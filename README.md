@@ -4,8 +4,10 @@ Coding Challenge for Stori made by Franco Liberali
 
 - [Practices used](#practices-used)
   - [Linting](#linting)
+  - [BDD + TDD](#bdd--tdd)
   - [CI](#ci)
 - [Dependencies](#dependencies)
+- [Emails](#emails)
 - [The challenge](#the-challenge)
   - [Bonus points](#bonus-points)
   - [Delivery and code requirements](#delivery-and-code-requirements)
@@ -20,6 +22,14 @@ The style of the code is verified using [golangci-lint](https://golangci-lint.ru
 make lint
 ```
 
+### BDD + TDD
+
+The project, as usual in my work, was carried out following the BDD ([Behaviour-Driven Development](https://cucumber.io/docs/bdd/)) + TDD ([Test-Driven Development](https://martinfowler.com/bliki/TestDrivenDevelopment.html)) process:
+
+![BDD + TDD](https://www.andolasoft.com/blog/wp-content/uploads/2015/05/TDD-vs-BDD.jpg)
+
+In the BDD process, feature tests (or e2e tests) are written in gherkin language and can be found in `test_e2e/features`. The execution of these tests is then automated using the godogs library. In the TDD process, unit tests are written alongside the corresponding code (whenever possible).
+
 ### CI
 
 The continuous integration process is run every time a pull request or commit is made to the main branch. It is based on Github Actions and covers the [linting](#linting) stages.
@@ -31,6 +41,16 @@ Some parts of the development process rely on external dependencies that you wil
 ```bash
 make install_dependencies
 ```
+
+## Emails
+
+Sending of emails is done using [MailSlurp](https://www.mailslurp.com/). Also the reception of emails in the e2e tests is done with this service.
+
+Some considerations:
+
+1. The API Key is hardcoded into the code in both tests and transaction processing. This is a clear security flaw but it was decided to do so in order to avoid that if correctors want to do a local test they need to create an account on that service. For a productive system this would be implemented with environment variables and secrets.
+2. The free version of this service is limited to 100 emails per month, so the sending of emails may start to fail if a lot of testing is done.
+3. As I am obviously not the owner of the storicard.com domain, the emails are sent from a domain provided by MailSlurp but in a productive system the domain should be configured to avoid phishing.
 
 ## The challenge
 

@@ -25,9 +25,17 @@ jobs:
         with:
           go-version: '^1.18'
           cache: true
-      - name: lint
+      - name: lint main
         uses: golangci/golangci-lint-action@v3
         with:
+          skip-cache: true
+          skip-pkg-cache: true
+          skip-build-cache: true
+      - name: lint test e2e
+        uses: golangci/golangci-lint-action@v3
+        with:
+          working-directory: test_e2e
+          args: --config=../.golangci.yml
           skip-cache: true
           skip-pkg-cache: true
           skip-build-cache: true
