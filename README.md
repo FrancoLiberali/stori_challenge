@@ -1,6 +1,36 @@
-# Stori challenge
+# Stori challenge <!-- omit in toc -->
 
 Coding Challenge for Stori made by Franco Liberali
+
+- [Practices used](#practices-used)
+  - [Linting](#linting)
+  - [CI](#ci)
+- [Dependencies](#dependencies)
+- [The challenge](#the-challenge)
+  - [Bonus points](#bonus-points)
+  - [Delivery and code requirements](#delivery-and-code-requirements)
+
+## Practices used
+
+### Linting
+
+The style of the code is verified using [golangci-lint](https://golangci-lint.run/). The file with the configuration used for the linter can be found at `.golangci.yml`. The linting is executed during the [continuous integration](#ci) process. To run it locally, [install the dependencies](#dependencies) and run:
+
+```bash
+make lint
+```
+
+### CI
+
+The continuous integration process is run every time a pull request or commit is made to the main branch. It is based on Github Actions and covers the [linting](#linting) stages.
+
+## Dependencies
+
+Some parts of the development process rely on external dependencies that you will need to install if you want to run them locally:
+
+```bash
+make install_dependencies
+```
 
 ## The challenge
 

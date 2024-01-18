@@ -1,0 +1,33 @@
+name: ci
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  id-token: write
+  contents: read
+  actions: read
+  checks: write
+
+jobs:
+  check-style:
+    name: Code style
+    needs: [branch-naming-rules]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '^1.18'
+          cache: true
+      - name: lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          skip-cache: true
+          skip-pkg-cache: true
+          skip-build-cache: true
