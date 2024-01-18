@@ -15,7 +15,6 @@ permissions:
 jobs:
   check-style:
     name: Code style
-    needs: [branch-naming-rules]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
