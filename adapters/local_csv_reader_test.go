@@ -81,15 +81,15 @@ asd`)
 
 			ans, err := reader.Read(tt.got)
 
-			assert.ErrorIs(t, err, tt.err)
+			tt.teardown(t)
+
+			require.ErrorIs(t, err, tt.err)
 
 			if err == nil {
 				assert.ElementsMatch(t, ans, tt.want)
 			} else {
-				assert.ErrorContains(t, err, tt.errMessage)
+				require.ErrorContains(t, err, tt.errMessage)
 			}
-
-			tt.teardown(t)
 		})
 	}
 }

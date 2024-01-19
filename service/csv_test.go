@@ -4,10 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/FrancoLiberali/stori_challenge/models"
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/FrancoLiberali/stori_challenge/models"
 )
 
 func TestCSVRowsToTransactions(t *testing.T) {
@@ -112,7 +113,7 @@ func TestCSVRowsToTransactions(t *testing.T) {
 			if err == nil {
 				assert.ElementsMatch(t, ans, tt.want)
 			} else {
-				assert.ErrorContains(t, err, tt.errMessage)
+				require.ErrorContains(t, err, tt.errMessage)
 			}
 		})
 	}

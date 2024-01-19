@@ -30,7 +30,7 @@ func TestParseTransactionID(t *testing.T) {
 			require.ErrorIs(t, err, tt.err)
 
 			if err == nil {
-				assert.Equal(t, ans, tt.want)
+				assert.Equal(t, tt.want, ans)
 			}
 		})
 	}

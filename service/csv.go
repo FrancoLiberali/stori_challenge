@@ -55,7 +55,7 @@ func csvRowsToTransactions(csvRows [][]string) ([]models.Transaction, error) {
 		}
 
 		transactions = append(transactions, models.Transaction{
-			ID:     uint(id),
+			ID:     id,
 			Date:   date,
 			Amount: amount,
 		})

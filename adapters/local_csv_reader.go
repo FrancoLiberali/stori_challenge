@@ -18,7 +18,7 @@ func (reader LocalCsvReader) Read(fileName string) ([][]string, error) {
 		return nil, fmt.Errorf("%w %s: %s", ErrReadingFile, fileName, err.Error())
 	}
 
-	// remember to close the file at the end of the program
+	// close the file after reading
 	defer file.Close()
 
 	// read csv values using csv.Reader
@@ -29,9 +29,11 @@ func (reader LocalCsvReader) Read(fileName string) ([][]string, error) {
 		return nil, fmt.Errorf("%w %s: %s", ErrReadingFile, fileName, err.Error())
 	}
 
+	// return error if file is empty
 	if len(data) <= 1 {
 		return nil, fmt.Errorf("%w %s: file has less that 2 lines", ErrReadingFile, fileName)
 	}
 
+	// avoid returning the header
 	return data[1:], nil
 }
