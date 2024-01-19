@@ -106,3 +106,42 @@ func TestCalculateTransactionsPerMonth(t *testing.T) {
 		})
 	}
 }
+
+func TestCalculateAverageDebitAndCredit(t *testing.T) {
+	service := Service{}
+	tests := []struct {
+		name   string
+		got    []models.Transaction
+		debit  string
+		credit string
+	}{
+		{"0 transactions returns 0, 0", []models.Transaction{}, "0", "0"},
+		{"1 debit returns that debit and 0", []models.Transaction{
+			{Amount: decimal.NewFromFloat(-10.3)},
+		}, "-10.3", "0"},
+		{"1 credit returns that 0 and that credit", []models.Transaction{
+			{Amount: decimal.NewFromFloat(60.5)},
+		}, "0", "60.5"},
+		{"1 debit and 1 credit returns that values", []models.Transaction{
+			{Amount: decimal.NewFromFloat(60.5)},
+			{Amount: decimal.NewFromFloat(-10.3)},
+		}, "-10.3", "60.5"},
+		{"multiple credits and debits", []models.Transaction{
+			{Amount: decimal.NewFromFloat(60.5)},
+			{Amount: decimal.NewFromFloat(-10.3)},
+			{Amount: decimal.NewFromFloat(-20.46)},
+			{Amount: decimal.NewFromFloat(10)},
+		}, "-15.38", "35.25"},
+	}
+
+	for _, tt := range tests {
+		// t.Run enables running "subtests", one for each
+		// table entry. These are shown separately
+		// when executing `go test -v`.
+		t.Run(tt.name, func(t *testing.T) {
+			debit, credit := service.CalculateAverageDebitAndCredit(tt.got)
+			assert.Equal(t, tt.debit, debit.String())
+			assert.Equal(t, tt.credit, credit.String())
+		})
+	}
+}

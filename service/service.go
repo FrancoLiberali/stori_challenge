@@ -38,9 +38,11 @@ func (service Service) Process(csvFileName, destinationEmail string) error {
 
 	totalBalance := service.CalculateTotalBalance(transactions)
 	transactionsPerMonth := service.CalculateTransactionsPerMonth(transactions)
+	avgDebit, avgCredit := service.CalculateAverageDebitAndCredit(transactions)
 
 	log.Println(totalBalance)
 	log.Println(transactionsPerMonth)
+	log.Println(avgDebit, avgCredit)
 
 	log.Println(destinationEmail)
 
@@ -49,9 +51,7 @@ func (service Service) Process(csvFileName, destinationEmail string) error {
 
 // CalculateTotalBalance calculates the total balance from a list of transactions as the sum of all transactions
 func (service Service) CalculateTotalBalance(transactions []models.Transaction) decimal.Decimal {
-	amounts := pie.Map(transactions, func(transaction models.Transaction) decimal.Decimal {
-		return transaction.Amount
-	})
+	amounts := transactionsToAmounts(transactions)
 
 	if len(amounts) == 0 {
 		return decimal.NewFromInt(0)
@@ -89,4 +89,39 @@ func (service Service) CalculateTransactionsPerMonth(transactions []models.Trans
 	})
 
 	return ans
+}
+
+// CalculateAverageDebitAndCredit calculates the average debit and average credit from a list of transactions
+func (service Service) CalculateAverageDebitAndCredit(transactions []models.Transaction) (decimal.Decimal, decimal.Decimal) {
+	amounts := transactionsToAmounts(transactions)
+
+	debits := pie.Filter(amounts, func(amount decimal.Decimal) bool {
+		return amount.LessThan(decimal.NewFromInt(0))
+	})
+
+	credits := pie.Filter(amounts, func(amount decimal.Decimal) bool {
+		return amount.GreaterThan(decimal.NewFromInt(0))
+	})
+
+	return calculateAverage(debits), calculateAverage(credits)
+}
+
+// calculateAverage calculates the average of a list of amount
+func calculateAverage(amounts []decimal.Decimal) decimal.Decimal {
+	if len(amounts) == 0 {
+		return decimal.NewFromInt(0)
+	}
+
+	if len(amounts) == 1 {
+		return amounts[0]
+	}
+
+	return decimal.Avg(amounts[0], amounts[1:]...)
+}
+
+// transactionsToAmounts transforms a list of transactions to a list of its amounts
+func transactionsToAmounts(transactions []models.Transaction) []decimal.Decimal {
+	return pie.Map(transactions, func(transaction models.Transaction) decimal.Decimal {
+		return transaction.Amount
+	})
 }
