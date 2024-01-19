@@ -19,7 +19,7 @@ var ErrParsingDate = errors.New("can't convert transaction date")
 
 // parseDate transforms a string in format "7/15" or "7/15/2023" to a time.Time
 //
-// Returns ErrParsingDate if the transformation is not possible
+// Returns ErrParsingDate if the transformation if not possible
 func parseDate(dateString string) (time.Time, error) {
 	dateSplitted := strings.Split(dateString, receivedDateSeparator)
 	if len(dateSplitted) < dayAndMonthLen {
