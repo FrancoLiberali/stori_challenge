@@ -9,7 +9,7 @@ import (
 )
 
 func TestParseDate(t *testing.T) {
-	var tests = []struct {
+	tests := []struct {
 		name string
 		got  string
 		want time.Time

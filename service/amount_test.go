@@ -8,7 +8,7 @@ import (
 )
 
 func TestParseAmount(t *testing.T) {
-	var tests = []struct {
+	tests := []struct {
 		name string
 		got  string
 		want float64

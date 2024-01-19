@@ -12,13 +12,14 @@ const (
 	receivedDateSeparator = "/"
 	wantDateSeparator     = "-"
 	dateLayout            = "07/15/2024"
+	dayAndMonthLen        = 2
 )
 
 var ErrParsingDate = errors.New("can't convert transaction date")
 
 func parseDate(dateString string) (time.Time, error) {
 	dateSplitted := strings.Split(dateString, receivedDateSeparator)
-	if len(dateSplitted) < 2 {
+	if len(dateSplitted) < dayAndMonthLen {
 		return time.Time{}, fmt.Errorf("%w: at least month and year are expected", ErrParsingDate)
 	}
 
@@ -30,7 +31,7 @@ func parseDate(dateString string) (time.Time, error) {
 	}
 
 	// if dateString doesn't have the year, assume this year
-	if len(dateSplitted) == 2 {
+	if len(dateSplitted) == dayAndMonthLen {
 		dateSplitted = append(dateSplitted, strconv.Itoa(time.Now().Year()))
 	}
 
