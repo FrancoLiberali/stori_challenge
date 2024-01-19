@@ -1,5 +1,11 @@
 # Stori challenge <!-- omit in toc -->
 
+[![Build Status](https://github.com/FrancoLiberali/stori_challenge/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/FrancoLiberali/stori_challenge/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/FrancoLiberali/stori_challenge)](https://goreportcard.com/report/github.com/FrancoLiberali/stori_challenge)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=FrancoLiberali_stori_challenge&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=FrancoLiberali_stori_challenge)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=FrancoLiberali_stori_challenge&metric=coverage)](https://sonarcloud.io/summary/new_code?id=FrancoLiberali_stori_challenge)
+[![Go.Dev reference](https://img.shields.io/badge/go.dev-reference-blue?logo=go&logoColor=white)](https://pkg.go.dev/github.com/FrancoLiberali/stori_challenge)
+
 Coding Challenge for Stori made by Franco Liberali
 
 - [Practices used](#practices-used)
@@ -86,9 +92,13 @@ Your project must meet these requirements:
 1. The summary email contains information on the total balance in the account, the number of transactions grouped by month, and the average credit and average debit amounts grouped by month. Using the transactions in the image above as an example, the summary info would be
 
     Total balance is 39.74
+
     Number of transactions in July: 2
+
     Number of transactions in August: 2
+
     Average debit amount: -15.38
+
     Average credit amount: 35.25
 
 2. Include the file you create in CSV format.

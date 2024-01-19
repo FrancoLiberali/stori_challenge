@@ -38,3 +38,40 @@ jobs:
           skip-cache: true
           skip-pkg-cache: true
           skip-build-cache: true
+
+  unit-tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '^1.18'
+          cache: true
+      - name: Run test
+        run:  go test ./... -coverprofile=coverage.out -v
+      - uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: coverage.out
+
+  sonarcloud:
+    name: SonarCloud
+    needs: [check-style, unit-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Download line coverage report
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage
+          path: coverage.out
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
