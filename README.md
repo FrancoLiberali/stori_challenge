@@ -10,10 +10,16 @@ Coding Challenge for Stori made by Franco Liberali
 
 - [Practices used](#practices-used)
   - [Linting](#linting)
+  - [Unit tests](#unit-tests)
+  - [Feature tests](#feature-tests)
+  - [Coverage](#coverage)
   - [BDD + TDD](#bdd--tdd)
+  - [Pull requests](#pull-requests)
   - [CI](#ci)
 - [Dependencies](#dependencies)
 - [Emails](#emails)
+- [Money](#money)
+- [Dates](#dates)
 - [The challenge](#the-challenge)
   - [Bonus points](#bonus-points)
   - [Delivery and code requirements](#delivery-and-code-requirements)
@@ -28,6 +34,28 @@ The style of the code is verified using [golangci-lint](https://golangci-lint.ru
 make lint
 ```
 
+### Unit tests
+
+Unit tests are added whenever possible. They are performed within the [TDD](#bdd--tdd) methodology. They can be found in files ending in `_test.go` that accompany the tested files. They are executed during [continuous integration](#ci). To run them locally, run:
+
+```bash
+make test_unit
+```
+
+or directly:
+
+```bash
+go test ./...
+```
+
+### Feature tests
+
+Feature tests (or e2e) are tests that cover the end-to-end system. They are located in the `test_e2e/` folder and are performed under the [BDD](#bdd--tdd) practice.
+
+### Coverage
+
+The coverage produced by the tests is measured using sonarcloud. It is displayed in the README of the project. In addition, for a pull request to be accepted, the minimum coverage on the new code must be at least 80%.
+
 ### BDD + TDD
 
 The project, as usual in my work, was carried out following the BDD ([Behaviour-Driven Development](https://cucumber.io/docs/bdd/)) + TDD ([Test-Driven Development](https://martinfowler.com/bliki/TestDrivenDevelopment.html)) process:
@@ -36,9 +64,13 @@ The project, as usual in my work, was carried out following the BDD ([Behaviour-
 
 In the BDD process, feature tests (or e2e tests) are written in gherkin language and can be found in `test_e2e/features`. The execution of these tests is then automated using the godogs library. In the TDD process, unit tests are written alongside the corresponding code (whenever possible).
 
+### Pull requests
+
+The main branch is protected and new code can only be added via pull requests. They must pass the [continuous integration](#ci) process in order to be merged. In this case, the review is done by myself as I am only one person.
+
 ### CI
 
-The continuous integration process is run every time a pull request or commit is made to the main branch. It is based on Github Actions and covers the [linting](#linting) stages.
+The continuous integration process is run every time a pull request or commit is made to the main branch. It is based on Github Actions and covers the [linting](#linting) and [unit testing](#unit-tests) stages.
 
 ## Dependencies
 
@@ -57,6 +89,14 @@ Some considerations:
 1. The API Key is hardcoded into the code in both tests and transaction processing. This is a clear security flaw but it was decided to do so in order to avoid that if correctors want to do a local test they need to create an account on that service. For a productive system this would be implemented with environment variables and secrets.
 2. The free version of this service is limited to 100 emails per month, so the sending of emails may start to fail if a lot of testing is done.
 3. As I am obviously not the owner of the storicard.com domain, the emails are sent from a domain provided by MailSlurp but in a productive system the domain should be configured to avoid phishing.
+
+## Money
+
+As transactions are, in general, decimal numbers, the decimal library (<https://github.com/shopspring/decimal>) was used for their representation to avoid loss of information when using floating point types such as float64.
+
+## Dates
+
+Dates are considered to be in UTC, so no time zone transformation is ever performed on them. It is also considered that if these dates do not have a year, it means that they are of the current year, and if the year is to be indicated, the format will be "7/15/2023".
 
 ## The challenge
 
