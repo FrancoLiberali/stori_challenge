@@ -4,3 +4,6 @@ install_dependencies:
 lint:
 	golangci-lint run
 	cd test_e2e && golangci-lint run --config ../.golangci.yml
+
+test_unit:
+	go test -v ./...
