@@ -6,7 +6,10 @@ import (
 
 	"github.com/shopspring/decimal"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
+	"github.com/FrancoLiberali/stori_challenge/adapters"
+	mocks "github.com/FrancoLiberali/stori_challenge/mocks/adapters"
 	"github.com/FrancoLiberali/stori_challenge/models"
 )
 
@@ -144,4 +147,34 @@ func TestCalculateAverageDebitAndCredit(t *testing.T) {
 			assert.Equal(t, tt.credit, credit.String())
 		})
 	}
+}
+
+func TestProcessReturnsErrorIfCSVCantBeRead(t *testing.T) {
+	mockCSVReader := mocks.NewCSVReader(t)
+	service := Service{CSVReader: mockCSVReader}
+
+	mockCSVReader.On("Read", "not_found.csv").Return(nil, adapters.ErrReadingFile)
+
+	err := service.Process("not_found.csv", "client@mail.com")
+	require.ErrorIs(t, err, adapters.ErrReadingFile)
+}
+
+func TestProcessReturnsErrorIfCSVCantBeParsed(t *testing.T) {
+	mockCSVReader := mocks.NewCSVReader(t)
+	service := Service{CSVReader: mockCSVReader}
+
+	mockCSVReader.On("Read", "found.csv").Return([][]string{{"asd"}}, nil)
+
+	err := service.Process("found.csv", "client@mail.com")
+	require.ErrorIs(t, err, ErrParsingCsv)
+}
+
+func TestProcessReturnsNilIfAllCorrect(t *testing.T) {
+	mockCSVReader := mocks.NewCSVReader(t)
+	service := Service{CSVReader: mockCSVReader}
+
+	mockCSVReader.On("Read", "correct.csv").Return([][]string{{"0", "7/15", "+60.5"}}, nil)
+
+	err := service.Process("correct.csv", "client@mail.com")
+	require.NoError(t, err)
 }

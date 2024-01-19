@@ -93,11 +93,10 @@ func localCSVFile(fileContent *godog.Table) error {
 // Executes the transaction processing system
 func executeSystem() error {
 	app := "stori_challenge"
+	argFile := "-file"
+	argEmail := "-email"
 
-	arg0 := fileName
-	arg1 := receiveInbox.EmailAddress
-
-	return exec.Command(app, arg0, arg1).Run()
+	return exec.Command(app, argFile, fileName, argEmail, receiveInbox.EmailAddress).Run()
 }
 
 // Checks that the receiveInbox got an email with the information from the godog.Table

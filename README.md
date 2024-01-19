@@ -8,6 +8,7 @@
 
 Coding Challenge for Stori made by Franco Liberali
 
+- [Execution](#execution)
 - [Practices used](#practices-used)
   - [Linting](#linting)
   - [Unit tests](#unit-tests)
@@ -23,6 +24,23 @@ Coding Challenge for Stori made by Franco Liberali
 - [The challenge](#the-challenge)
   - [Bonus points](#bonus-points)
   - [Delivery and code requirements](#delivery-and-code-requirements)
+
+## Execution
+
+To run the processing you will need a csv file of transactions. Two examples can be found in txns1.csv and txns2.csv. To run it locally you can:
+
+Run it with go run:
+
+```bash
+go run . -file txns2.csv -email you@email.com
+```
+
+Install it and then run it:
+
+```bash
+go install .
+stori_challenge -file txns2.csv -email you@email.com
+```
 
 ## Practices used
 
@@ -48,9 +66,19 @@ or directly:
 go test ./...
 ```
 
+To ensure that they are unitary, mocks are used. They are generated using [mockery](https://vektra.github.io/mockery/latest/). To regenerate them, [install the dependencies](#dependencies) and run:
+
+```bash
+go generate ./...
+```
+
 ### Feature tests
 
-Feature tests (or e2e) are tests that cover the end-to-end system. They are located in the `test_e2e/` folder and are performed under the [BDD](#bdd--tdd) practice.
+Feature tests (or e2e) are tests that cover the end-to-end system. They are located in the `test_e2e/` folder and are performed under the [BDD](#bdd--tdd) practice. They are executed during [continuous integration](#ci). To run them locally, run:
+
+```bash
+make test_e2e
+```
 
 ### Coverage
 
