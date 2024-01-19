@@ -2,15 +2,23 @@ package service
 
 import (
 	"log"
+	"sort"
+	"time"
+
+	"github.com/elliotchance/pie/v2"
+	"github.com/shopspring/decimal"
 
 	"github.com/FrancoLiberali/stori_challenge/adapters"
 	"github.com/FrancoLiberali/stori_challenge/models"
-	"github.com/elliotchance/pie/v2"
-	"github.com/shopspring/decimal"
 )
 
 type Service struct {
 	CSVReader adapters.CSVReader
+}
+
+type TransactionsPerMonth struct {
+	Month  time.Time
+	Amount int
 }
 
 // Process read csv file called csvFileName,
@@ -29,8 +37,12 @@ func (service Service) Process(csvFileName, destinationEmail string) error {
 	}
 
 	totalBalance := service.CalculateTotalBalance(transactions)
+	transactionsPerMonth := service.CalculateTransactionsPerMonth(transactions)
 
 	log.Println(totalBalance)
+	log.Println(transactionsPerMonth)
+
+	log.Println(destinationEmail)
 
 	return nil
 }
@@ -53,4 +65,28 @@ func (service Service) CalculateTotalBalance(transactions []models.Transaction) 
 		amounts[0],
 		amounts[1:]...,
 	)
+}
+
+// CalculateTransactionsPerMonth calculates the amount of transactions
+// for each month present in the list of transactions.
+// The returned list is in ascending order by month.
+func (service Service) CalculateTransactionsPerMonth(transactions []models.Transaction) []TransactionsPerMonth {
+	// group by year and month
+	grouped := pie.GroupBy(transactions, func(transaction models.Transaction) time.Time {
+		return time.Date(transaction.Date.Year(), transaction.Date.Month(), 1, 0, 0, 0, 0, time.UTC)
+	})
+
+	ans := make([]TransactionsPerMonth, 0, len(grouped))
+
+	// count amount of transactions per group
+	for month, transactions := range grouped {
+		ans = append(ans, TransactionsPerMonth{Month: month, Amount: len(transactions)})
+	}
+
+	// order by month
+	sort.Slice(ans, func(i, j int) bool {
+		return ans[i].Month.Compare(ans[j].Month) == -1
+	})
+
+	return ans
 }
