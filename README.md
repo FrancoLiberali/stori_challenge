@@ -45,32 +45,31 @@ You can use the pre-built image or build it yourself.
 The [CD](#cd) process updates the image in the container registry each time a commit is made to the main branch.
 
 1. Install docker
-2. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> ghcr.io/francoliberali/stori_challenge:latest -file txns2.csv -email you@email.com`
+2. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> -v $(pwd):/data ghcr.io/francoliberali/stori_challenge:latest -file txns2.csv -email you@email.com`
 
 > :warning: To run it locally you will need a [mailjet](mailjet.com) key pair. See [emails](#emails) for details.
 
 #### Build the image
 
 1. Install docker
-2. `docker build -t francoliberali/stori_challenge:latest .`
-3. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> francoliberali/stori_challenge -file txns2.csv -email you@email.com`
+2. Clone this repository
+3. `docker build -t francoliberali/stori_challenge:latest .`
+4. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> -v $(pwd):/data francoliberali/stori_challenge -file txns2.csv -email you@email.com`
 
 ### Run with Go
 
-Install Go 1.18+.
+1. Install Go 1.18+.
+2. Clone this repository
+3. `go mod download`
 
 Run it with go run:
 
-```bash
-EMAIL_PUBLIC_API_KEY=<public-api-key> EMAIL_PRIVATE_API_KEY=<private-api-key> go run . -file txns2.csv -email you@email.com
-```
+4. `EMAIL_PUBLIC_API_KEY=<public-api-key> EMAIL_PRIVATE_API_KEY=<private-api-key> go run . -file txns2.csv -email you@email.com`
 
 Or install it and then run it:
 
-```bash
-go install .
-EMAIL_PUBLIC_API_KEY=<public-api-key> EMAIL_PRIVATE_API_KEY=<private-api-key> stori_challenge -file txns2.csv -email you@email.com
-```
+4. `go install .`
+5. `EMAIL_PUBLIC_API_KEY=<public-api-key> EMAIL_PRIVATE_API_KEY=<private-api-key> stori_challenge -file txns2.csv -email you@email.com`
 
 ## Practices used
 
