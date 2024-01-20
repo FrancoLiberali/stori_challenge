@@ -1,5 +1,5 @@
 FROM golang:alpine AS builder
-RUN apk add build-base
+RUN apk --no-cache add build-base
 WORKDIR /app
 COPY go.mod .
 COPY go.sum .
@@ -8,7 +8,7 @@ COPY main.go .
 COPY app app/
 RUN go build -o stori_challenge
 
-FROM alpine
+FROM alpine:3.19
 COPY --from=builder /app/stori_challenge stori_challenge
 RUN addgroup -S nonroot \
     && adduser -S nonroot -G nonroot
