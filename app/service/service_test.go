@@ -8,9 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/FrancoLiberali/stori_challenge/adapters"
+	"github.com/FrancoLiberali/stori_challenge/app/adapters"
+	"github.com/FrancoLiberali/stori_challenge/app/models"
 	mocks "github.com/FrancoLiberali/stori_challenge/mocks/adapters"
-	"github.com/FrancoLiberali/stori_challenge/models"
 )
 
 func TestCalculateTotalBalance(t *testing.T) {

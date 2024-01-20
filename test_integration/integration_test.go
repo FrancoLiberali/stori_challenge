@@ -3,9 +3,9 @@ package testintegration
 import (
 	"testing"
 
-	"github.com/FrancoLiberali/stori_challenge/adapters"
+	"github.com/FrancoLiberali/stori_challenge/app/adapters"
+	"github.com/FrancoLiberali/stori_challenge/app/service"
 	mocks "github.com/FrancoLiberali/stori_challenge/mocks/adapters"
-	"github.com/FrancoLiberali/stori_challenge/service"
 	"github.com/stretchr/testify/require"
 )
 

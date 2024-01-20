@@ -9,12 +9,14 @@
 Coding Challenge for Stori made by Franco Liberali
 
 - [Execution](#execution)
+  - [Run with docker](#run-with-docker)
+  - [Run with Go](#run-with-go)
 - [Practices used](#practices-used)
   - [Linting](#linting)
   - [Unit tests](#unit-tests)
   - [Integration tests](#integration-tests)
   - [Feature tests](#feature-tests)
-  - [Coverage](#coverage)
+  - [Static analyzer](#static-analyzer)
   - [BDD + TDD](#bdd--tdd)
   - [Pull requests](#pull-requests)
   - [CI](#ci)
@@ -30,21 +32,29 @@ Coding Challenge for Stori made by Franco Liberali
 
 To run the processing you will need a csv file of transactions. Two examples can be found in txns1.csv and txns2.csv. To run it locally you can:
 
+### Run with docker
+
+1. Install docker
+2. `docker build -t francoliberali/stori_challenge:latest .`
+3. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> francoliberali/stori_challenge -file txns2.csv -email you@email.com`
+
+> :warning: To run it locally you will need a [mailjet](mailjet.com) key pair. See [emails](#emails) for details.
+
+### Run with Go
+
+Install Go 1.18+.
+
 Run it with go run:
 
 ```bash
-MAILGUN_API_KEY=<api-key> go run . -file txns2.csv -email you@email.com
+EMAIL_PUBLIC_API_KEY=<public-api-key> EMAIL_PRIVATE_API_KEY=<private-api-key> go run . -file txns2.csv -email you@email.com
 ```
 
-> :warning: To run it locally you will need a [mailgun](https://www.mailgun.com/) api key. See [emails](#emails) for details.
-
-> :warning: For this to work, your email must be in the list of accepted recipients. Contact [Franco Liberali](mailto:franco.liberali@gmail.com) to be added to the list. See [emails](#emails) for details.
-
-Install it and then run it:
+Or install it and then run it:
 
 ```bash
 go install .
-MAILGUN_API_KEY=<api-key> stori_challenge -file txns2.csv -email you@email.com
+EMAIL_PUBLIC_API_KEY=<public-api-key> EMAIL_PRIVATE_API_KEY=<private-api-key> stori_challenge -file txns2.csv -email you@email.com
 ```
 
 ## Practices used
@@ -90,12 +100,12 @@ make test_integration
 Feature tests (or e2e) are tests that cover the end-to-end system. They are located in the `test_e2e/` folder and are performed under the [BDD](#bdd--tdd) practice. They are executed during [continuous integration](#ci). To run them locally, run:
 
 ```bash
-MAILGUN_API_KEY=<api-key> make test_e2e
+EMAIL_PUBLIC_API_KEY=<public-api-key> EMAIL_PRIVATE_API_KEY=<private-api-key> make test_e2e
 ```
 
-### Coverage
+### Static analyzer
 
-The coverage produced by the tests is measured using sonarcloud. It is displayed in the README of the project. In addition, for a pull request to be accepted, the minimum coverage on the new code must be at least 80%.
+TA static analysis of the code is performed by [sonarcloud](https://sonarcloud.io/project/overview?id=FrancoLiberali_stori_challenge). It checks for bad smells, security problems, test coverage and other issues. It is displayed in the README of the project. In addition, for a pull request to be accepted, these controls must be passed.
 
 ### BDD + TDD
 
@@ -123,14 +133,13 @@ make install_dependencies
 
 ## Emails
 
-Sending of emails is done using [Mailgun](https://www.mailgun.com/).
+Sending of emails is done using [Mailjet](https://www.mailjet.com/).
 
 Some considerations:
 
-1. To run the programme locally, it is necessary to have the API Key to send mails. To avoid creating an account you can use the api key `1c7d656666792b166ec2edae59c94c150c-4c955d28-e438d12f` (I only add the api key here to simplify the work of correcting this challenge, obviously in real life the api key would never be shared).
-2. The free version of this service only allows you to send emails to authorised recipients. If you use the shared api key you must contact Franco Liberali to be added to this list.
-3. The free version of this service is limited in the amount of emails per month, so the sending of emails may start to fail if a lot of testing is done.
-4. As I am obviously not the owner of the storicard.com domain, the emails are sent from a domain provided by Mailgun. This may result in emails being marked as Spam. Please check your spam box when testing. In a productive system the domain should be configured to avoid this and phishing.
+1. To run the programme locally, it is necessary to have the API Key to send mails. To avoid creating an account you can use the public api key `0ed12cb0ba8d922820a93ea5242db813` and private api key `0ba6132387f60806f1bf9476eb6e1987` (I only add the api key here to simplify the work of correcting this challenge, obviously in real life the api key would never be shared).
+2. The free version of this service is limited in the amount of emails per month, so the sending of emails may start to fail if a lot of testing is done.
+3. As I am obviously not the owner of the storicard.com domain, the emails are sent from <franco.liberali@gmail.com>. This may result in emails being marked as Spam. Please check your spam box when testing. In a productive system the domain should be configured to avoid this and phishing.
 
 In the feature tests, [MailSlurp](https://www.mailslurp.com/) is used for the reception of emails.
 

@@ -8,8 +8,8 @@ import (
 	"github.com/elliotchance/pie/v2"
 	"github.com/shopspring/decimal"
 
-	"github.com/FrancoLiberali/stori_challenge/adapters"
-	"github.com/FrancoLiberali/stori_challenge/models"
+	"github.com/FrancoLiberali/stori_challenge/app/adapters"
+	"github.com/FrancoLiberali/stori_challenge/app/models"
 )
 
 type Service struct {

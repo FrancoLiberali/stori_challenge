@@ -5,19 +5,22 @@ import (
 	"log"
 	"os"
 
-	"github.com/FrancoLiberali/stori_challenge/adapters"
-	"github.com/FrancoLiberali/stori_challenge/service"
+	"github.com/FrancoLiberali/stori_challenge/app/adapters"
+	"github.com/FrancoLiberali/stori_challenge/app/service"
 )
 
 //go:generate mockery --all --keeptree
 
 const helpHeader string = `Stori challenge by Franco Liberali.
-Usage: go run . [FLAGS]
+Usage: stori_challenge [FLAGS]
 
 FLAGS:
 `
 
-const MailgunAPIKeyEnvVar = "MAILGUN_API_KEY" //nolint:gosec // just the env var name
+const (
+	emailPublicAPIKeyEnvVar  = "EMAIL_PUBLIC_API_KEY"  //nolint:gosec // just the env var name
+	emailPrivateAPIKeyEnvVar = "EMAIL_PRIVATE_API_KEY" //nolint:gosec // just the env var name
+)
 
 func main() {
 	csvFileName := flag.String("file", "", "CSV file with transactions to be processed")
@@ -33,16 +36,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	mailgunAPIKey := os.Getenv(MailgunAPIKeyEnvVar)
-	if mailgunAPIKey == "" {
-		print("Mailgun api key env variable not configured") //nolint:forbidigo // here is correct to print
+	emailPublicAPIKey := os.Getenv(emailPublicAPIKeyEnvVar)
+	emailPrivateAPIKey := os.Getenv(emailPrivateAPIKeyEnvVar)
+
+	if emailPublicAPIKey == "" || emailPrivateAPIKey == "" {
+		print("Email api key env variables not configured") //nolint:forbidigo // here is correct to print
 		os.Exit(1)
 	}
 
 	processService := service.Service{
 		CSVReader: adapters.LocalCsvReader{},
-		EmailSender: adapters.MailgunEmailSender{
-			APIKey: mailgunAPIKey,
+		EmailSender: adapters.MailJetEmailSender{
+			PublicAPIKey:  emailPublicAPIKey,
+			PrivateAPIKey: emailPrivateAPIKey,
 		},
 	}
 
