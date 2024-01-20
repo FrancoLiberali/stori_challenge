@@ -125,7 +125,7 @@ func s3CSVFile(fileContent *godog.Table) error {
 
 	// Read the contents of the file into a buffer
 	var buf bytes.Buffer
-	if _, err := io.Copy(&buf, file); err != nil {
+	if _, err = io.Copy(&buf, file); err != nil {
 		return err
 	}
 

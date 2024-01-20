@@ -16,7 +16,10 @@ type S3CSVReader struct {
 	LocalCSVReader LocalCSVReader
 }
 
-const awsRegion = "us-east-2"
+const (
+	awsRegion      = "us-east-2"
+	s3FileNameSize = 2 // bucket/filename
+)
 
 // Read reads a CSV file by its name.
 //
@@ -24,7 +27,7 @@ const awsRegion = "us-east-2"
 // or ErrReadingFile if an error is produced
 func (reader S3CSVReader) Read(fileName string) ([][]string, error) {
 	fileNameSplitted := strings.Split(fileName, "/")
-	if len(fileNameSplitted) != 2 {
+	if len(fileNameSplitted) != s3FileNameSize {
 		return nil, fmt.Errorf("%w %s: %s", ErrReadingFile, fileName, "invalid s3 path")
 	}
 
