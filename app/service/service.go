@@ -13,8 +13,8 @@ import (
 )
 
 type Service struct {
-	CSVReader   adapters.CSVReader
-	EmailSender adapters.EmailSender
+	TransactionsReader TransactionsReader
+	EmailSender        adapters.EmailSender
 }
 
 type TransactionsPerMonth struct {
@@ -36,12 +36,7 @@ Average credit amount: %s
 // and average credit and debit
 // and send this information by email to destinationEmail
 func (service Service) Process(csvFileName, destinationEmail string) error {
-	csvRows, err := service.CSVReader.Read(csvFileName)
-	if err != nil {
-		return err
-	}
-
-	transactions, err := csvRowsToTransactions(csvRows)
+	transactions, err := service.TransactionsReader.Read(csvFileName)
 	if err != nil {
 		return err
 	}

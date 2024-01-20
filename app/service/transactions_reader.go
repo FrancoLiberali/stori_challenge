@@ -3,11 +3,14 @@ package service
 import (
 	"errors"
 	"fmt"
+	"strings"
 
+	"github.com/FrancoLiberali/stori_challenge/app/adapters"
 	"github.com/FrancoLiberali/stori_challenge/app/models"
 )
 
 const (
+	s3Prefix               = "s3://"
 	IDIndex                = 0
 	IDHeader               = "Id"
 	DateIndex              = 1
@@ -17,20 +20,49 @@ const (
 	numberOfElementsPerRow = 3
 )
 
-var ErrParsingCsv = errors.New("error parsing transactions csv")
+type TransactionsReader struct {
+	LocalCSVReader adapters.CSVReader
+	S3CSVReader    adapters.CSVReader
+}
 
-// csvRowsToTransactions transforms a list of csv rows into a list of models.Transaction,
+var ErrReadingTransactions = errors.New("error parsing transactions csv")
+
+// Read reads a CSV file that contains a list of transactions.
+//
+// If the csvFileName starts with 's3://', it reads the csv from s3. Otherwise, it reads it from local folder.
+//
+// Returns the list of transactions of the CSV file
+// or ErrReadingTransactions if an error is produced
+func (reader TransactionsReader) Read(csvFileName string) ([]models.Transaction, error) {
+	var csvReader adapters.CSVReader
+
+	if strings.HasPrefix(csvFileName, s3Prefix) {
+		csvReader = reader.S3CSVReader
+		csvFileName = csvFileName[len(s3Prefix):]
+	} else {
+		csvReader = reader.LocalCSVReader
+	}
+
+	csvRows, err := csvReader.Read(csvFileName)
+	if err != nil {
+		return nil, fmt.Errorf("%w: %s", ErrReadingTransactions, err.Error())
+	}
+
+	return reader.parse(csvRows)
+}
+
+// Parse transforms a list of csv rows into a list of models.Transaction,
 // converting each cell of the row in the correct type.
 //
 // Returns the list of transactions or ErrParsingCsv if there is an error during type conversion
-func csvRowsToTransactions(csvRows [][]string) ([]models.Transaction, error) {
+func (reader TransactionsReader) parse(csvRows [][]string) ([]models.Transaction, error) {
 	// create list with the same size as csvRows
 	transactions := make([]models.Transaction, 0, len(csvRows))
 
 	// transform each row into a models.Transaction
 	for lineNumber, row := range csvRows {
 		if len(row) != numberOfElementsPerRow {
-			return nil, fmt.Errorf("%w: error parsing line %d: %d elements expected, got %d", ErrParsingCsv, lineNumber+1, numberOfElementsPerRow, len(row))
+			return nil, fmt.Errorf("%w: error parsing line %d: %d elements expected, got %d", ErrReadingTransactions, lineNumber+1, numberOfElementsPerRow, len(row))
 		}
 
 		idString := row[IDIndex]
@@ -68,6 +100,6 @@ func csvRowsToTransactions(csvRows [][]string) ([]models.Transaction, error) {
 func errorParsingCSV(header string, stringValue string, lineNumber int) error {
 	return fmt.Errorf(
 		"%w: error parsing %s %q in line %d",
-		ErrParsingCsv, header, stringValue, lineNumber+1,
+		ErrReadingTransactions, header, stringValue, lineNumber+1,
 	)
 }

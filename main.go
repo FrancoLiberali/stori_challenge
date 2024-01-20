@@ -4,7 +4,6 @@ import (
 	"flag"
 	"log"
 	"os"
-	"path/filepath"
 
 	"github.com/FrancoLiberali/stori_challenge/app/adapters"
 	"github.com/FrancoLiberali/stori_challenge/app/service"
@@ -21,7 +20,6 @@ FLAGS:
 const (
 	emailPublicAPIKeyEnvVar  = "EMAIL_PUBLIC_API_KEY"  //nolint:gosec // just the env var name
 	emailPrivateAPIKeyEnvVar = "EMAIL_PRIVATE_API_KEY" //nolint:gosec // just the env var name
-	csvFilePrefix            = "data"
 )
 
 func main() {
@@ -38,8 +36,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	csvFileName := filepath.Join(csvFilePrefix, *csvFileNameParam)
-
 	emailPublicAPIKey := os.Getenv(emailPublicAPIKeyEnvVar)
 	emailPrivateAPIKey := os.Getenv(emailPrivateAPIKeyEnvVar)
 
@@ -49,14 +45,17 @@ func main() {
 	}
 
 	processService := service.Service{
-		CSVReader: adapters.LocalCsvReader{},
+		TransactionsReader: service.TransactionsReader{
+			LocalCSVReader: adapters.LocalCSVReader{},
+			S3CSVReader:    adapters.S3CSVReader{},
+		},
 		EmailSender: adapters.MailJetEmailSender{
 			PublicAPIKey:  emailPublicAPIKey,
 			PrivateAPIKey: emailPrivateAPIKey,
 		},
 	}
 
-	err := processService.Process(csvFileName, *destinationEmail)
+	err := processService.Process(*csvFileNameParam, *destinationEmail)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

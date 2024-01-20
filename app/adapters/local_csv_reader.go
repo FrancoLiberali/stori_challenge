@@ -6,13 +6,13 @@ import (
 	"os"
 )
 
-type LocalCsvReader struct{}
+type LocalCSVReader struct{}
 
 // Read reads a CSV file by its name.
 //
 // Returns the list of rows of the CSV file
 // or ErrReadingFile if an error is produced
-func (reader LocalCsvReader) Read(fileName string) ([][]string, error) {
+func (reader LocalCSVReader) Read(fileName string) ([][]string, error) {
 	file, err := os.Open(fileName)
 	if err != nil {
 		return nil, fmt.Errorf("%w %s: %s", ErrReadingFile, fileName, err.Error())

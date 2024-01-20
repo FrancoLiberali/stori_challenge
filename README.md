@@ -45,7 +45,7 @@ You can use the pre-built image or build it yourself.
 The [CD](#cd) process updates the image in the container registry each time a commit is made to the main branch.
 
 1. Install docker
-2. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> -v $(pwd):/data ghcr.io/francoliberali/stori_challenge:latest -file txns2.csv -email you@email.com`
+2. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> -v $(pwd):/data ghcr.io/francoliberali/stori_challenge:latest -file data/txns2.csv -email you@email.com`
 
 > :warning: To run it locally you will need a [mailjet](mailjet.com) key pair. See [emails](#emails) for details.
 
@@ -54,7 +54,7 @@ The [CD](#cd) process updates the image in the container registry each time a co
 1. Install docker
 2. Clone this repository
 3. `docker build -t francoliberali/stori_challenge:latest .`
-4. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> -v $(pwd):/data francoliberali/stori_challenge -file txns2.csv -email you@email.com`
+4. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> -v $(pwd):/data francoliberali/stori_challenge -file data/txns2.csv -email you@email.com`
 
 ### Run with Go
 
@@ -116,6 +116,8 @@ Feature tests (or e2e) are tests that cover the end-to-end system. They are loca
 ```bash
 EMAIL_PUBLIC_API_KEY=<public-api-key> EMAIL_PRIVATE_API_KEY=<private-api-key> make test_e2e
 ```
+
+For executing this, you will need to have configured your aws credentials in `~/.aws/credentials`. For details see <https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials>.
 
 ### Static analyzer
 
