@@ -9,8 +9,9 @@ RUN go build -o stori_challenge
 
 FROM alpine
 COPY --from=builder /app/stori_challenge stori_challenge
-ENV EMAIL_PUBLIC_API_KEY=
-ENV EMAIL_PRIVATE_API_KEY=
+RUN addgroup -S nonroot \
+    && adduser -S nonroot -G nonroot
+USER nonroot
 COPY txns1.csv txns1.csv
 COPY txns2.csv txns2.csv
 ENTRYPOINT ["/stori_challenge"]
