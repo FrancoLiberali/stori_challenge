@@ -16,7 +16,7 @@ Coding Challenge for Stori made by Franco Liberali
   - [Unit tests](#unit-tests)
   - [Integration tests](#integration-tests)
   - [Feature tests](#feature-tests)
-  - [Coverage](#coverage)
+  - [Static analyzer](#static-analyzer)
   - [BDD + TDD](#bdd--tdd)
   - [Pull requests](#pull-requests)
   - [CI](#ci)
@@ -103,9 +103,9 @@ Feature tests (or e2e) are tests that cover the end-to-end system. They are loca
 EMAIL_PUBLIC_API_KEY=<public-api-key> EMAIL_PRIVATE_API_KEY=<private-api-key> make test_e2e
 ```
 
-### Coverage
+### Static analyzer
 
-The coverage produced by the tests is measured using sonarcloud. It is displayed in the README of the project. In addition, for a pull request to be accepted, the minimum coverage on the new code must be at least 80%.
+TA static analysis of the code is performed by [sonarcloud](https://sonarcloud.io/project/overview?id=FrancoLiberali_stori_challenge). It checks for bad smells, security problems, test coverage and other issues. It is displayed in the README of the project. In addition, for a pull request to be accepted, these controls must be passed.
 
 ### BDD + TDD
 
