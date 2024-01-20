@@ -12,6 +12,7 @@ Coding Challenge for Stori made by Franco Liberali
 - [Practices used](#practices-used)
   - [Linting](#linting)
   - [Unit tests](#unit-tests)
+  - [Integration tests](#integration-tests)
   - [Feature tests](#feature-tests)
   - [Coverage](#coverage)
   - [BDD + TDD](#bdd--tdd)
@@ -74,6 +75,14 @@ To ensure that they are unitary, mocks are used. They are generated using [mocke
 
 ```bash
 go generate ./...
+```
+
+### Integration tests
+
+Integration tests test the correct integration between the different components of the system. They are intermediate between unit tests (where any component other than the one being tested is mocked) and e2e tests (where the system is run as a black box). Here, the file reading component is used, but the email sending is mocked. They are executed during [continuous integration](#ci). To run them locally, run:
+
+```bash
+make test_integration
 ```
 
 ### Feature tests

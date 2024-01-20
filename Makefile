@@ -9,8 +9,11 @@ lint:
 test_unit:
 	go test -v ./...
 
+test_integration:
+	go test -v ./test_integration
+
 test_e2e:
 	go install .
 	go test ./test_e2e
 
-.PHONY: test_e2e
+.PHONY: test_e2e test_integration

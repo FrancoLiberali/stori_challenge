@@ -51,24 +51,46 @@ jobs:
           go-version: '^1.18'
           cache: true
       - name: Run test
-        run:  go test ./... -coverprofile=coverage.out -v
+        run:  go test ./... -coverprofile=coverage_unit.out -v
       - uses: actions/upload-artifact@v3
         with:
-          name: coverage
-          path: coverage.out
+          name: coverage_unit
+          path: coverage_unit.out
 
-  sonarcloud:
-    name: SonarCloud
-    needs: [check-style, unit-tests]
+  integration-tests:
+    name: Integration tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Download line coverage report
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '^1.18'
+          cache: true
+      - name: Run test
+        run:  go test ./test_integration -coverprofile=coverage_int.out -v
+      - uses: actions/upload-artifact@v3
+        with:
+          name: coverage_int
+          path: coverage_int.out
+
+  sonarcloud:
+    name: SonarCloud
+    needs: [check-style, unit-tests, integration-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Download unit line coverage report
         uses: actions/download-artifact@v3
         with:
-          name: coverage
+          name: coverage_unit
+      - name: Download integration line coverage report
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage_int
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
