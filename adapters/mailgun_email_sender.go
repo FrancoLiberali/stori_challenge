@@ -9,7 +9,7 @@ import (
 )
 
 type MailgunEmailSender struct {
-	ApiKey string
+	APIKey string
 }
 
 const (
@@ -22,7 +22,7 @@ const (
 //
 // Returns ErrSendingEmail if an error is produced
 func (sender MailgunEmailSender) Send(recipient, subject, body string) error {
-	mg := mailgun.NewMailgun(mailgunDomain, sender.ApiKey)
+	mg := mailgun.NewMailgun(mailgunDomain, sender.APIKey)
 
 	message := mg.NewMessage(senderEmail, subject, body, recipient)
 
