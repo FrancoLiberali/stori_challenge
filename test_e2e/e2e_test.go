@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/csv"
+	"log"
 	"os"
 	"os/exec"
 	"testing"
@@ -96,7 +97,12 @@ func executeSystem() error {
 	argFile := "-file"
 	argEmail := "-email"
 
-	return exec.Command(app, argFile, fileName, argEmail, receiveInbox.EmailAddress).Run()
+	output, err := exec.Command(app, argFile, fileName, argEmail, receiveInbox.EmailAddress).CombinedOutput()
+	if err != nil {
+		log.Println(string(output))
+	}
+
+	return err
 }
 
 // Checks that the receiveInbox got an email with the information from the godog.Table
@@ -108,13 +114,13 @@ func iReceiveTheEmail(subject string, content *godog.Table) error {
 	}
 
 	// assert email content
-	err = assertExpectedAndActual(assert.Equal, subject, email.Subject)
+	err = assertExpectedAndActual(assert.Equal, subject, *email.Subject)
 	if err != nil {
 		return err
 	}
 
 	for _, row := range content.Rows {
-		err = assertExpectedAndActual(assert.Contains, row.Cells[0].Value, email.Body)
+		err = assertExpectedAndActual(assert.Contains, *email.Body, row.Cells[0].Value)
 		if err != nil {
 			return err
 		}

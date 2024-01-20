@@ -12,6 +12,7 @@ Coding Challenge for Stori made by Franco Liberali
 - [Practices used](#practices-used)
   - [Linting](#linting)
   - [Unit tests](#unit-tests)
+  - [Integration tests](#integration-tests)
   - [Feature tests](#feature-tests)
   - [Coverage](#coverage)
   - [BDD + TDD](#bdd--tdd)
@@ -32,14 +33,18 @@ To run the processing you will need a csv file of transactions. Two examples can
 Run it with go run:
 
 ```bash
-go run . -file txns2.csv -email you@email.com
+MAILGUN_API_KEY=<api-key> go run . -file txns2.csv -email you@email.com
 ```
+
+> :warning: To run it locally you will need a [mailgun](https://www.mailgun.com/) api key. See [emails](#emails) for details.
+
+> :warning: For this to work, your email must be in the list of accepted recipients. Contact [Franco Liberali](mailto:franco.liberali@gmail.com) to be added to the list. See [emails](#emails) for details.
 
 Install it and then run it:
 
 ```bash
 go install .
-stori_challenge -file txns2.csv -email you@email.com
+MAILGUN_API_KEY=<api-key> stori_challenge -file txns2.csv -email you@email.com
 ```
 
 ## Practices used
@@ -72,12 +77,20 @@ To ensure that they are unitary, mocks are used. They are generated using [mocke
 go generate ./...
 ```
 
+### Integration tests
+
+Integration tests test the correct integration between the different components of the system. They are intermediate between unit tests (where any component other than the one being tested is mocked) and e2e tests (where the system is run as a black box). Here, the file reading component is used, but the email sending is mocked. They are executed during [continuous integration](#ci). To run them locally, run:
+
+```bash
+make test_integration
+```
+
 ### Feature tests
 
 Feature tests (or e2e) are tests that cover the end-to-end system. They are located in the `test_e2e/` folder and are performed under the [BDD](#bdd--tdd) practice. They are executed during [continuous integration](#ci). To run them locally, run:
 
 ```bash
-make test_e2e
+MAILGUN_API_KEY=<api-key> make test_e2e
 ```
 
 ### Coverage
@@ -110,13 +123,20 @@ make install_dependencies
 
 ## Emails
 
-Sending of emails is done using [MailSlurp](https://www.mailslurp.com/). Also the reception of emails in the e2e tests is done with this service.
+Sending of emails is done using [Mailgun](https://www.mailgun.com/).
 
 Some considerations:
 
-1. The API Key is hardcoded into the code in both tests and transaction processing. This is a clear security flaw but it was decided to do so in order to avoid that if correctors want to do a local test they need to create an account on that service. For a productive system this would be implemented with environment variables and secrets.
-2. The free version of this service is limited to 100 emails per month, so the sending of emails may start to fail if a lot of testing is done.
-3. As I am obviously not the owner of the storicard.com domain, the emails are sent from a domain provided by MailSlurp but in a productive system the domain should be configured to avoid phishing.
+1. To run the programme locally, it is necessary to have the API Key to send mails. To avoid creating an account you can use the api key `1c7d656666792b166ec2edae59c94c150c-4c955d28-e438d12f` (I only add the api key here to simplify the work of correcting this challenge, obviously in real life the api key would never be shared).
+2. The free version of this service only allows you to send emails to authorised recipients. If you use the shared api key you must contact Franco Liberali to be added to this list.
+3. The free version of this service is limited in the amount of emails per month, so the sending of emails may start to fail if a lot of testing is done.
+4. As I am obviously not the owner of the storicard.com domain, the emails are sent from a domain provided by Mailgun. This may result in emails being marked as Spam. Please check your spam box when testing. In a productive system the domain should be configured to avoid this and phishing.
+
+In the feature tests, [MailSlurp](https://www.mailslurp.com/) is used for the reception of emails.
+
+Some considerations:
+
+1. The API Key is hardcoded into the code. This is an accepted simplification as it is only an account used for testing purposes.
 
 ## Money
 

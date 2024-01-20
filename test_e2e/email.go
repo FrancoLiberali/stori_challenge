@@ -11,7 +11,7 @@ import (
 
 const (
 	mailSlurpAPIKey  = "1e00055b86ab2cb033a3b9330145583afb5e239b1040e7110356998fc62a96cd" //nolint:gosec // simplification
-	receiveInboxID   = "24315fc2-8b2a-4d60-81a8-ab2aaab5cb75"
+	receiveInboxID   = "5025da91-f501-4449-9d24-72e06773d061"
 	mailSlurpTimeout = 30000 // miliseconds
 )
 

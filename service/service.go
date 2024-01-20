@@ -1,7 +1,7 @@
 package service
 
 import (
-	"log"
+	"fmt"
 	"sort"
 	"time"
 
@@ -13,13 +13,23 @@ import (
 )
 
 type Service struct {
-	CSVReader adapters.CSVReader
+	CSVReader   adapters.CSVReader
+	EmailSender adapters.EmailSender
 }
 
 type TransactionsPerMonth struct {
 	Month  time.Time
 	Amount int
 }
+
+const (
+	emailMessage = `
+Total balance is: %s
+%sAverage debit amount: %s
+Average credit amount: %s
+`
+	emailSubject = "Stori transaction summary"
+)
 
 // Process read csv file called csvFileName,
 // calculates total balance, number of transactions grouped by month
@@ -40,13 +50,38 @@ func (service Service) Process(csvFileName, destinationEmail string) error {
 	transactionsPerMonth := service.CalculateTransactionsPerMonth(transactions)
 	avgDebit, avgCredit := service.CalculateAverageDebitAndCredit(transactions)
 
-	log.Println(totalBalance)
-	log.Println(transactionsPerMonth)
-	log.Println(avgDebit, avgCredit)
+	return service.EmailSender.Send(destinationEmail, emailSubject, fmt.Sprintf(
+		emailMessage,
+		totalBalance,
+		transactionsPerMonthToString(transactionsPerMonth),
+		avgDebit,
+		avgCredit,
+	))
+}
 
-	log.Println(destinationEmail)
+// transactionsPerMonthToString transforms a list of transactions per month to string that can be sent to the user by email
+func transactionsPerMonthToString(transactionsPerMonth []TransactionsPerMonth) string {
+	result := ""
 
-	return nil
+	for _, transactionPerMonth := range transactionsPerMonth {
+		// add year if not current year
+		if transactionPerMonth.Month.Year() != time.Now().Year() {
+			result += fmt.Sprintf(
+				"Number of transactions in %s %d: %d\n",
+				transactionPerMonth.Month.Month().String(),
+				transactionPerMonth.Month.Year(),
+				transactionPerMonth.Amount,
+			)
+		} else {
+			result += fmt.Sprintf(
+				"Number of transactions in %s: %d\n",
+				transactionPerMonth.Month.Month().String(),
+				transactionPerMonth.Amount,
+			)
+		}
+	}
+
+	return result
 }
 
 // CalculateTotalBalance calculates the total balance from a list of transactions as the sum of all transactions
