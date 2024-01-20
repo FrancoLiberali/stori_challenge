@@ -34,7 +34,7 @@ Coding Challenge for Stori made by Franco Liberali
 
 ## Execution
 
-To run the processing you will need a csv file of transactions. Two examples can be found in txns1.csv and txns2.csv. To run it locally you can:
+To run the processing you will need a csv file of transactions. These files can be either local or hosted on s3 (publicly accessible). Two local examples can be found in `txns1.csv` and `txns2.csv` and its s3 version `s3://fl-stori-challenge/txns1.csv` and `s3://fl-stori-challenge/txns2.csv`. To run it locally you can:
 
 ### Run with docker
 
@@ -45,7 +45,14 @@ You can use the pre-built image or build it yourself.
 The [CD](#cd) process updates the image in the container registry each time a commit is made to the main branch.
 
 1. Install docker
+
+With local file:
+
 2. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> -v $(pwd):/data ghcr.io/francoliberali/stori_challenge:latest -file data/txns2.csv -email you@email.com`
+
+With AWS S3 hosted file:
+
+2. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> ghcr.io/francoliberali/stori_challenge:latest -file s3://fl-stori-challenge/txns2.csv -email you@email.com`
 
 > :warning: To run it locally you will need a [mailjet](mailjet.com) key pair. See [emails](#emails) for details.
 
