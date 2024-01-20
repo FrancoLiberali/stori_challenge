@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/FrancoLiberali/stori_challenge/models"
+	"github.com/FrancoLiberali/stori_challenge/app/models"
 )
 
 const (

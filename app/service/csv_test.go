@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/FrancoLiberali/stori_challenge/models"
+	"github.com/FrancoLiberali/stori_challenge/app/models"
 )
 
 func TestCSVRowsToTransactions(t *testing.T) {

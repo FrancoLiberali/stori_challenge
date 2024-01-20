@@ -4,7 +4,8 @@ WORKDIR /app
 COPY go.mod .
 COPY go.sum .
 RUN go mod download
-COPY . .
+COPY main.go .
+COPY app app/
 RUN go build -o stori_challenge
 
 FROM alpine

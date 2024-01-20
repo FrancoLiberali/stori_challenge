@@ -5,8 +5,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/FrancoLiberali/stori_challenge/adapters"
-	"github.com/FrancoLiberali/stori_challenge/service"
+	"github.com/FrancoLiberali/stori_challenge/app/adapters"
+	"github.com/FrancoLiberali/stori_challenge/app/service"
 )
 
 //go:generate mockery --all --keeptree
