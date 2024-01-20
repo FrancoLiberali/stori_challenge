@@ -14,6 +14,6 @@ test_integration:
 
 test_e2e:
 	go install .
-	go test ./test_e2e
+	go test -count=1 ./test_e2e
 
 .PHONY: test_e2e test_integration
