@@ -1,0 +1,24 @@
+name: 'cd'
+on:
+  workflow_run:
+    workflows: ["ci"]
+    branches: [main]
+    types:
+      - completed
+
+jobs:
+  build:
+    name: 'Build'
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Build:checkout"
+        uses: actions/checkout@v2
+      - name: 'Build:dockerimage'
+        uses: docker/build-push-action@v1
+        with:
+          registry: ghcr.io
+          username: "FrancoLiberali"
+          password: ${{ secrets.ACCESS_TOKEN }}
+          repository: francoliberali/stori_challenge
+          tags: latest
