@@ -10,6 +10,8 @@ Coding Challenge for Stori made by Franco Liberali
 
 - [Execution](#execution)
   - [Run with docker](#run-with-docker)
+    - [Use the image from the container register](#use-the-image-from-the-container-register)
+    - [Build the image](#build-the-image)
   - [Run with Go](#run-with-go)
 - [Practices used](#practices-used)
   - [Linting](#linting)
@@ -20,6 +22,7 @@ Coding Challenge for Stori made by Franco Liberali
   - [BDD + TDD](#bdd--tdd)
   - [Pull requests](#pull-requests)
   - [CI](#ci)
+  - [CD](#cd)
 - [Dependencies](#dependencies)
 - [Emails](#emails)
 - [Money](#money)
@@ -34,11 +37,22 @@ To run the processing you will need a csv file of transactions. Two examples can
 
 ### Run with docker
 
+You can use the pre-built image or build it yourself.
+
+#### Use the image from the container register
+
+The [CD](#cd) process updates the image in the container registry each time a commit is made to the main branch.
+
+1. Install docker
+2. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> ghcr.io/francoliberali/stori_challenge:latest -file txns2.csv -email you@email.com`
+
+> :warning: To run it locally you will need a [mailjet](mailjet.com) key pair. See [emails](#emails) for details.
+
+#### Build the image
+
 1. Install docker
 2. `docker build -t francoliberali/stori_challenge:latest .`
 3. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> francoliberali/stori_challenge -file txns2.csv -email you@email.com`
-
-> :warning: To run it locally you will need a [mailjet](mailjet.com) key pair. See [emails](#emails) for details.
 
 ### Run with Go
 
@@ -121,7 +135,11 @@ The main branch is protected and new code can only be added via pull requests. T
 
 ### CI
 
-The continuous integration process is run every time a pull request or commit is made to the main branch. It is based on Github Actions and covers the [linting](#linting) and [unit testing](#unit-tests) stages.
+The continuous integration process is run every time a pull request or commit is made to the main branch. It is based on Github Actions and covers the [linting](#linting), [unit testing](#unit-tests), [integration testing](#integration-tests), [feature testing](#feature-tests) and [static analysis](#static-analyzer) stages.
+
+### CD
+
+The continuous delivery process is executed every time a commit is performed on the main branch and the CI process is successful. It builds the docker image and pushes it to the container registry.
 
 ## Dependencies
 
