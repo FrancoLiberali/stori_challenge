@@ -20,6 +20,6 @@
 # Go workspace file
 # go.work
 
-test_e2e/*.csv
+test_e2e/data
 .vscode
 stori_challenge

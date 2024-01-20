@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"testing"
 
 	"github.com/cucumber/godog"
@@ -24,7 +25,8 @@ var (
 )
 
 const (
-	localFileName = "local_csv_file.csv"
+	localCsvFileDir = "data"
+	localFileName   = "local_csv_file.csv"
 )
 
 func init() {
@@ -66,7 +68,13 @@ func InitializeScenario(sc *godog.ScenarioContext) {
 
 // Creates a CSV file called local_csv_file.csv with the content of the godog.Table
 func localCSVFile(fileContent *godog.Table) error {
-	csvFile, err := os.Create(localFileName)
+	filePath := filepath.Join("data", localFileName)
+
+	if _, err := os.Stat("/path/to/your-file"); os.IsNotExist(err) {
+		os.MkdirAll(localCsvFileDir, 0o700) // Create your file
+	}
+
+	csvFile, err := os.Create(filePath)
 	if err != nil {
 		return err
 	}

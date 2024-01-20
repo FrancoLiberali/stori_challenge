@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/FrancoLiberali/stori_challenge/app/adapters"
 	"github.com/FrancoLiberali/stori_challenge/app/service"
@@ -20,21 +21,24 @@ FLAGS:
 const (
 	emailPublicAPIKeyEnvVar  = "EMAIL_PUBLIC_API_KEY"  //nolint:gosec // just the env var name
 	emailPrivateAPIKeyEnvVar = "EMAIL_PRIVATE_API_KEY" //nolint:gosec // just the env var name
+	csvFilePrefix            = "data"
 )
 
 func main() {
-	csvFileName := flag.String("file", "", "CSV file with transactions to be processed")
+	csvFileNameParam := flag.String("file", "", "CSV file with transactions to be processed")
 	destinationEmail := flag.String("email", "", "Email address where the results of the process will be sent")
 	help := flag.Bool("help", false, "Help")
 
 	flag.Parse()
 
-	if *help || *csvFileName == "" || *destinationEmail == "" {
+	if *help || *csvFileNameParam == "" || *destinationEmail == "" {
 		print(helpHeader) //nolint:forbidigo // here is correct to print
 		flag.PrintDefaults()
 
 		os.Exit(1)
 	}
+
+	csvFileName := filepath.Join(csvFilePrefix, *csvFileNameParam)
 
 	emailPublicAPIKey := os.Getenv(emailPublicAPIKeyEnvVar)
 	emailPrivateAPIKey := os.Getenv(emailPrivateAPIKeyEnvVar)
@@ -52,7 +56,7 @@ func main() {
 		},
 	}
 
-	err := processService.Process(*csvFileName, *destinationEmail)
+	err := processService.Process(csvFileName, *destinationEmail)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
