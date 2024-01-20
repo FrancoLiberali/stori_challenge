@@ -23,6 +23,7 @@ Coding Challenge for Stori made by Franco Liberali
   - [Pull requests](#pull-requests)
   - [CI](#ci)
   - [CD](#cd)
+  - [Hexagonal architecture](#hexagonal-architecture)
 - [Dependencies](#dependencies)
 - [Emails](#emails)
 - [Money](#money)
@@ -140,6 +141,14 @@ The continuous integration process is run every time a pull request or commit is
 ### CD
 
 The continuous delivery process is executed every time a commit is performed on the main branch and the CI process is successful. It builds the docker image and pushes it to the container registry.
+
+### Hexagonal architecture
+
+The code was created following the [hexagonal architecture pattern](https://alistair.cockburn.us/hexagonal-architecture/):
+
+![hexagonal architecture](https://upload.wikimedia.org/wikipedia/commons/thumb/7/75/Hexagonal_Architecture.svg/313px-Hexagonal_Architecture.svg.png)
+
+Following it, the components that interact with external services (io for reading csv files and mailjet for sending mails) are isolated in the `app/adapters` package, while the core business that is in `app/service` only depends on interfaces. This allows for easy testability using mocks and component swapping if necessary, without modifying the business logic.
 
 ## Dependencies
 
