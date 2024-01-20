@@ -32,14 +32,18 @@ To run the processing you will need a csv file of transactions. Two examples can
 Run it with go run:
 
 ```bash
-go run . -file txns2.csv -email you@email.com
+MAILGUN_API_KEY=<api-key> go run . -file txns2.csv -email you@email.com
 ```
+
+> :warning: To run it locally you will need a [mailgun](https://www.mailgun.com/) api key. See [emails](#emails) for details.
+
+> :warning: For this to work, your email must be in the list of accepted recipients. Contact [Franco Liberali](mailto:franco.liberali@gmail.com) to be added to the list. See [emails](#emails) for details.
 
 Install it and then run it:
 
 ```bash
 go install .
-stori_challenge -file txns2.csv -email you@email.com
+MAILGUN_API_KEY=<api-key> stori_challenge -file txns2.csv -email you@email.com
 ```
 
 ## Practices used
