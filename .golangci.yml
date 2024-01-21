@@ -112,10 +112,13 @@ linters-settings:
     # it's a comma-separated list of prefixes
     local-prefixes: github.com/FrancoLiberali/
   gomoddirectives:
+    # Allow local `replace` directives.
+    # Default: false
+    replace-local: true
     # List of allowed `replace` directives.
     # Default: []
     replace-allow-list:
-      - gorm.io/gorm
+      - github.com/FrancoLiberali/stori_challenge/app
   gomodguard:
     blocked:
       # List of blocked modules.

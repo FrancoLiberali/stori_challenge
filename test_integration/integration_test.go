@@ -3,10 +3,11 @@ package testintegration
 import (
 	"testing"
 
-	"github.com/FrancoLiberali/stori_challenge/app/adapters"
-	"github.com/FrancoLiberali/stori_challenge/app/service"
-	mocks "github.com/FrancoLiberali/stori_challenge/mocks/app/adapters"
 	"github.com/stretchr/testify/require"
+
+	"github.com/FrancoLiberali/stori_challenge/app/adapters"
+	mocks "github.com/FrancoLiberali/stori_challenge/app/mocks/adapters"
+	"github.com/FrancoLiberali/stori_challenge/app/service"
 )
 
 func TestProcessLocalCSVFileSendsEmail(t *testing.T) {

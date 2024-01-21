@@ -7,8 +7,8 @@ on:
       - completed
 
 jobs:
-  build:
-    name: 'Build'
+  docker:
+    name: Docker
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
@@ -22,3 +22,26 @@ jobs:
           password: ${{ secrets.ACCESS_TOKEN }}
           repository: francoliberali/stori_challenge
           tags: latest
+
+  aws-lambda:
+    name: AWS lambda
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout source code
+        uses: actions/checkout@v3
+      - name: Install Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: '^1.18'
+          cache: true
+      - name: Build binary
+        run: make aws_build
+      - name: Deploy
+        uses: appleboy/lambda-action@v0.1.9
+        with:
+          aws_access_key_id: ${{ secrets.AWS_LAMBDA_ACCESS_KEY_ID }}
+          aws_secret_access_key: ${{ secrets.AWS_LAMBDA_SECRET_ACCESS_KEY }}
+          aws_region: ${{ secrets.AWS_REGION }}
+          function_name: fl-stori-challenge
+          zip_file: aws_lambda/stori-challenge.zip

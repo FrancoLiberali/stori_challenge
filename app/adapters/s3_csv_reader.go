@@ -3,6 +3,7 @@ package adapters
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -26,7 +27,7 @@ const (
 // Returns the list of rows of the CSV file
 // or ErrReadingFile if an error is produced
 func (reader S3CSVReader) Read(fileName string) ([][]string, error) {
-	fileNameSplitted := strings.Split(fileName, "/")
+	fileNameSplitted := strings.Split(fileName, string(filepath.Separator))
 	if len(fileNameSplitted) != s3FileNameSize {
 		return nil, errReadingFile(fileName, "invalid s3 path")
 	}
@@ -34,13 +35,14 @@ func (reader S3CSVReader) Read(fileName string) ([][]string, error) {
 	bucket := fileNameSplitted[0]
 	item := fileNameSplitted[1]
 
-	file, err := os.Create(item)
+	itemFileName := filepath.Join(os.TempDir(), item)
+
+	file, err := os.Create(itemFileName)
 	if err != nil {
 		return nil, errReadingFile(fileName, err.Error())
 	}
 
 	defer file.Close()
-	defer os.Remove(item)
 
 	// Initialize a session in us-west-2
 	sess, err := session.NewSession(&aws.Config{
@@ -53,7 +55,8 @@ func (reader S3CSVReader) Read(fileName string) ([][]string, error) {
 
 	downloader := s3manager.NewDownloader(sess)
 
-	_, err = downloader.Download(file,
+	_, err = downloader.Download(
+		file,
 		&s3.GetObjectInput{
 			Bucket: aws.String(bucket),
 			Key:    aws.String(item),
@@ -62,7 +65,7 @@ func (reader S3CSVReader) Read(fileName string) ([][]string, error) {
 		return nil, errReadingFile(fileName, fmt.Sprintf("Unable to download item: %s", err.Error()))
 	}
 
-	return reader.LocalCSVReader.Read(item)
+	return reader.LocalCSVReader.Read(itemFileName)
 }
 
 func errReadingFile(fileName string, internalErr string) error {
