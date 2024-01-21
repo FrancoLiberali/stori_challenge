@@ -1,6 +1,7 @@
 # Stori challenge <!-- omit in toc -->
 
-[![Build Status](https://github.com/FrancoLiberali/stori_challenge/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/FrancoLiberali/stori_challenge/actions)
+[![CI Status](https://github.com/FrancoLiberali/stori_challenge/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/FrancoLiberali/stori_challenge/actions)
+[![CD Status](https://github.com/FrancoLiberali/stori_challenge/actions/workflows/cd.yml/badge.svg?branch=main)](https://github.com/FrancoLiberali/stori_challenge/actions)
 [![Go Report Card](https://goreportcard.com/badge/github.com/FrancoLiberali/stori_challenge)](https://goreportcard.com/report/github.com/FrancoLiberali/stori_challenge)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=FrancoLiberali_stori_challenge&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=FrancoLiberali_stori_challenge)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=FrancoLiberali_stori_challenge&metric=coverage)](https://sonarcloud.io/summary/new_code?id=FrancoLiberali_stori_challenge)
@@ -36,7 +37,7 @@ Coding Challenge for Stori made by Franco Liberali
 
 ## Execution
 
-To run the processing you will need a csv file of transactions. These files can be either local or hosted on s3 (publicly accessible). Two local examples can be found in `txns1.csv` and `txns2.csv` and its s3 version `s3://fl-stori-challenge/txns1.csv` and `s3://fl-stori-challenge/txns2.csv`. To run it locally you can:
+To run the processing you will need a csv file of transactions. These files can be either local or hosted on s3 (publicly accessible). Two local examples can be found in `data/txns1.csv` and `data/txns2.csv` and its s3 version `s3://fl-stori-challenge/txns1.csv` and `s3://fl-stori-challenge/txns2.csv`. To run it locally you can:
 
 ### Run on AWS Lambda
 
@@ -68,7 +69,7 @@ The [CD](#cd) process updates the image in the container registry each time a co
 
 With local file:
 
-2. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> -v $(pwd):/data ghcr.io/francoliberali/stori_challenge:latest -file data/txns2.csv -email you@email.com`
+2. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> -v $(pwd)/data:/data ghcr.io/francoliberali/stori_challenge:latest -file data/txns2.csv -email you@email.com`
 
 > :warning: To run it locally you will need a [mailjet](mailjet.com) key pair. See [emails](#emails) for details.
 
@@ -81,7 +82,7 @@ With AWS S3 hosted file:
 1. Install docker
 2. Clone this repository
 3. `docker build -t francoliberali/stori_challenge:latest .`
-4. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> -v $(pwd):/data francoliberali/stori_challenge -file data/txns2.csv -email you@email.com`
+4. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> -v $(pwd)/data:/data francoliberali/stori_challenge -file data/txns2.csv -email you@email.com`
 
 #### Run with Go
 
@@ -91,12 +92,12 @@ With AWS S3 hosted file:
 
 Run it with go run:
 
-4. `EMAIL_PUBLIC_API_KEY=<public-api-key> EMAIL_PRIVATE_API_KEY=<private-api-key> go run . -file txns2.csv -email you@email.com`
+4. `EMAIL_PUBLIC_API_KEY=<public-api-key> EMAIL_PRIVATE_API_KEY=<private-api-key> go run . -file data/txns2.csv -email you@email.com`
 
 Or install it and then run it:
 
 4. `go install .`
-5. `EMAIL_PUBLIC_API_KEY=<public-api-key> EMAIL_PRIVATE_API_KEY=<private-api-key> stori_challenge -file txns2.csv -email you@email.com`
+5. `EMAIL_PUBLIC_API_KEY=<public-api-key> EMAIL_PRIVATE_API_KEY=<private-api-key> stori_challenge -file data/txns2.csv -email you@email.com`
 
 ## Practices used
 

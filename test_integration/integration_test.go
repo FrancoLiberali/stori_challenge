@@ -27,7 +27,7 @@ Average debit amount: -15.38
 Average credit amount: 35.25
 `).Return(nil)
 
-	err := storiService.Process("../txns1.csv", "client@mail.com")
+	err := storiService.Process("../data/txns1.csv", "client@mail.com")
 	require.NoError(t, err)
 }
 
