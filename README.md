@@ -9,10 +9,12 @@
 Coding Challenge for Stori made by Franco Liberali
 
 - [Execution](#execution)
-  - [Run with docker](#run-with-docker)
-    - [Use the image from the container register](#use-the-image-from-the-container-register)
-    - [Build the image](#build-the-image)
-  - [Run with Go](#run-with-go)
+  - [Run on AWS Lambda](#run-on-aws-lambda)
+  - [Run locally](#run-locally)
+    - [Run with docker](#run-with-docker)
+      - [Image from the container registry](#image-from-the-container-registry)
+      - [Build the image](#build-the-image)
+    - [Run with Go](#run-with-go)
 - [Practices used](#practices-used)
   - [Linting](#linting)
   - [Unit tests](#unit-tests)
@@ -36,11 +38,29 @@ Coding Challenge for Stori made by Franco Liberali
 
 To run the processing you will need a csv file of transactions. These files can be either local or hosted on s3 (publicly accessible). Two local examples can be found in `txns1.csv` and `txns2.csv` and its s3 version `s3://fl-stori-challenge/txns1.csv` and `s3://fl-stori-challenge/txns2.csv`. To run it locally you can:
 
-### Run with docker
+### Run on AWS Lambda
+
+The developed solution is deployed on AWS Lambda. To execute it performs HTTP request to the function, for example, as follows:
+
+```bash
+curl 'https://a7cerhsfswfdffbmpioigjay7q0vzkur.lambda-url.us-east-2.on.aws/' -H 'Content-type: application/json' -d '{ "file": "s3://fl-stori-challenge/txns2.csv", "email": "you@email.com" }'
+```
+
+> :warning: Don't forget to replace <you@email.com> with your email address
+
+This version only accepts files hosted on AWS S3 (publicly).
+
+The [CD](#cd) process updates the function each time a commit is made to the main branch.
+
+### Run locally
+
+In the local version it is possible to use both local files and files hosted on AWS S3 (publicly).
+
+#### Run with docker
 
 You can use the pre-built image or build it yourself.
 
-#### Use the image from the container register
+##### Image from the container registry
 
 The [CD](#cd) process updates the image in the container registry each time a commit is made to the main branch.
 
@@ -50,20 +70,20 @@ With local file:
 
 2. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> -v $(pwd):/data ghcr.io/francoliberali/stori_challenge:latest -file data/txns2.csv -email you@email.com`
 
+> :warning: To run it locally you will need a [mailjet](mailjet.com) key pair. See [emails](#emails) for details.
+
 With AWS S3 hosted file:
 
 2. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> ghcr.io/francoliberali/stori_challenge:latest -file s3://fl-stori-challenge/txns2.csv -email you@email.com`
 
-> :warning: To run it locally you will need a [mailjet](mailjet.com) key pair. See [emails](#emails) for details.
-
-#### Build the image
+##### Build the image
 
 1. Install docker
 2. Clone this repository
 3. `docker build -t francoliberali/stori_challenge:latest .`
 4. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> -v $(pwd):/data francoliberali/stori_challenge -file data/txns2.csv -email you@email.com`
 
-### Run with Go
+#### Run with Go
 
 1. Install Go 1.18+.
 2. Clone this repository
@@ -142,7 +162,7 @@ The continuous integration process is run every time a pull request or commit is
 
 ### CD
 
-The continuous delivery process is executed every time a commit is performed on the main branch and the CI process is successful. It builds the docker image and pushes it to the container registry.
+The continuous delivery process is executed every time a commit is performed on the main branch and the CI process is successful. It builds the docker image and pushes it to the container registry and builds the AWS Lambda function and deploys it.
 
 ### Hexagonal architecture
 
