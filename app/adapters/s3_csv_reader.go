@@ -28,7 +28,7 @@ const (
 func (reader S3CSVReader) Read(fileName string) ([][]string, error) {
 	fileNameSplitted := strings.Split(fileName, "/")
 	if len(fileNameSplitted) != s3FileNameSize {
-		return nil, fmt.Errorf("%w %s: %s", ErrReadingFile, fileName, "invalid s3 path")
+		return nil, errReadingFile(fileName, "invalid s3 path")
 	}
 
 	bucket := fileNameSplitted[0]
@@ -36,7 +36,7 @@ func (reader S3CSVReader) Read(fileName string) ([][]string, error) {
 
 	file, err := os.Create(item)
 	if err != nil {
-		return nil, fmt.Errorf("%w %s: %s", ErrReadingFile, fileName, err.Error())
+		return nil, errReadingFile(fileName, err.Error())
 	}
 
 	defer file.Close()
@@ -48,7 +48,7 @@ func (reader S3CSVReader) Read(fileName string) ([][]string, error) {
 		Credentials: credentials.AnonymousCredentials,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("%w %s: %s", ErrReadingFile, fileName, err.Error())
+		return nil, errReadingFile(fileName, err.Error())
 	}
 
 	downloader := s3manager.NewDownloader(sess)
@@ -59,8 +59,12 @@ func (reader S3CSVReader) Read(fileName string) ([][]string, error) {
 			Key:    aws.String(item),
 		})
 	if err != nil {
-		return nil, fmt.Errorf("%w %s: Unable to download item: %s", ErrReadingFile, fileName, err.Error())
+		return nil, errReadingFile(fileName, fmt.Sprintf("Unable to download item: %s", err.Error()))
 	}
 
 	return reader.LocalCSVReader.Read(item)
+}
+
+func errReadingFile(fileName string, internalErr string) error {
+	return fmt.Errorf("%w %s: %s", ErrReadingFile, fileName, internalErr)
 }
