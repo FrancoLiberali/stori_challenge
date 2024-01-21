@@ -30,6 +30,30 @@ jobs:
           skip-cache: true
           skip-pkg-cache: true
           skip-build-cache: true
+      - name: lint app
+        uses: golangci/golangci-lint-action@v3
+        with:
+          working-directory: app
+          args: --config=../.golangci.yml
+          skip-cache: true
+          skip-pkg-cache: true
+          skip-build-cache: true
+      - name: lint aws lambda
+        uses: golangci/golangci-lint-action@v3
+        with:
+          working-directory: aws_lambda
+          args: --config=../.golangci.yml
+          skip-cache: true
+          skip-pkg-cache: true
+          skip-build-cache: true
+      - name: lint test integration
+        uses: golangci/golangci-lint-action@v3
+        with:
+          working-directory: test_integration
+          args: --config=../.golangci.yml
+          skip-cache: true
+          skip-pkg-cache: true
+          skip-build-cache: true
       - name: lint test e2e
         uses: golangci/golangci-lint-action@v3
         with:

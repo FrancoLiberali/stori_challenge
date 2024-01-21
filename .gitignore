@@ -23,3 +23,5 @@
 csv_file.csv
 .vscode
 stori_challenge
+aws_lambda/bootstrap
+aws_lambda/stori-challenge.zip

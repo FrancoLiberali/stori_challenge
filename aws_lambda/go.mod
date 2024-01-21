@@ -1,8 +1,11 @@
-module github.com/FrancoLiberali/stori_challenge
+module github.com/FrancoLiberali/stori_challenge/aws_lambda
 
 go 1.18
 
-require github.com/FrancoLiberali/stori_challenge/app v0.0.1
+require (
+	github.com/FrancoLiberali/stori_challenge/app v0.0.1
+	github.com/aws/aws-lambda-go v1.45.0
+)
 
 require (
 	github.com/aws/aws-sdk-go v1.50.0 // indirect
@@ -14,4 +17,4 @@ require (
 	golang.org/x/exp v0.0.0-20220321173239-a90fa8a75705 // indirect
 )
 
-replace github.com/FrancoLiberali/stori_challenge/app => ./app
+replace github.com/FrancoLiberali/stori_challenge/app => ./../app

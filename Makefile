@@ -4,10 +4,13 @@ install_dependencies:
 
 lint:
 	golangci-lint run
+	cd aws_lambda && golangci-lint run --config ../.golangci.yml
+	cd app && golangci-lint run --config ../.golangci.yml
+	cd test_integration && golangci-lint run --config ../.golangci.yml
 	cd test_e2e && golangci-lint run --config ../.golangci.yml
 
 test_unit:
-	go test -v ./...
+	go test -v ./app/...
 
 test_integration:
 	go test -v ./test_integration
@@ -15,5 +18,12 @@ test_integration:
 test_e2e:
 	go install .
 	go test -count=1 ./test_e2e
+
+docker_build:
+	docker build -t francoliberali/stori_challenge:latest .
+
+aws_build:
+	cd aws_lambda && GOOS=linux GOARCH=amd64 go build -tags lambda.norpc -o bootstrap main.go
+	cd aws_lambda && zip stori-challenge.zip bootstrap
 
 .PHONY: test_e2e test_integration

@@ -2,6 +2,8 @@ go 1.18
 
 use (
 	.
+	./app
+	./aws_lambda
 	./test_e2e
 	./test_integration
 )

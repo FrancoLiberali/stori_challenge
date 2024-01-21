@@ -96,16 +96,10 @@ Unit tests are added whenever possible. They are performed within the [TDD](#bdd
 make test_unit
 ```
 
-or directly:
-
-```bash
-go test ./...
-```
-
 To ensure that they are unitary, mocks are used. They are generated using [mockery](https://vektra.github.io/mockery/latest/). To regenerate them, [install the dependencies](#dependencies) and run:
 
 ```bash
-go generate ./...
+go generate ./app/...
 ```
 
 ### Integration tests
