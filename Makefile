@@ -23,7 +23,6 @@ docker_build:
 	docker build -t francoliberali/stori_challenge:latest .
 
 aws_build:
-	cd aws_lambda && GOOS=linux GOARCH=amd64 go build -tags lambda.norpc -o bootstrap main.go
-	cd aws_lambda && zip stori-challenge.zip bootstrap
+	cd aws_lambda && GOOS=linux GOARCH=amd64 go build -tags lambda.norpc -o bootstrap main.go && zip stori-challenge.zip bootstrap
 
 .PHONY: test_e2e test_integration
