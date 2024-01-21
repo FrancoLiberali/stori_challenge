@@ -10,7 +10,7 @@ import (
 
 	"github.com/FrancoLiberali/stori_challenge/app/adapters"
 	"github.com/FrancoLiberali/stori_challenge/app/models"
-	mocks "github.com/FrancoLiberali/stori_challenge/mocks/adapters"
+	mocks "github.com/FrancoLiberali/stori_challenge/mocks/app/adapters"
 )
 
 func TestCalculateTotalBalance(t *testing.T) {
@@ -151,29 +151,36 @@ func TestCalculateAverageDebitAndCredit(t *testing.T) {
 
 func TestProcessReturnsErrorIfCSVCantBeRead(t *testing.T) {
 	mockCSVReader := mocks.NewCSVReader(t)
-	service := Service{CSVReader: mockCSVReader}
+	service := Service{TransactionsReader: TransactionsReader{
+		LocalCSVReader: mockCSVReader,
+	}}
 
 	mockCSVReader.On("Read", "not_found.csv").Return(nil, adapters.ErrReadingFile)
 
 	err := service.Process("not_found.csv", "client@mail.com")
-	require.ErrorIs(t, err, adapters.ErrReadingFile)
+	require.ErrorIs(t, err, ErrReadingTransactions)
+	require.ErrorContains(t, err, "error while reading file")
 }
 
 func TestProcessReturnsErrorIfCSVCantBeParsed(t *testing.T) {
 	mockCSVReader := mocks.NewCSVReader(t)
-	service := Service{CSVReader: mockCSVReader}
+	service := Service{TransactionsReader: TransactionsReader{
+		LocalCSVReader: mockCSVReader,
+	}}
 
 	mockCSVReader.On("Read", "found.csv").Return([][]string{{"asd"}}, nil)
 
 	err := service.Process("found.csv", "client@mail.com")
-	require.ErrorIs(t, err, ErrParsingCsv)
+	require.ErrorIs(t, err, ErrReadingTransactions)
 }
 
 func TestReturnsErrorIfErrorIsProducedWhileSendingEmail(t *testing.T) {
 	mockCSVReader := mocks.NewCSVReader(t)
 	mockEmailSender := mocks.NewEmailSender(t)
 	service := Service{
-		CSVReader:   mockCSVReader,
+		TransactionsReader: TransactionsReader{
+			LocalCSVReader: mockCSVReader,
+		},
 		EmailSender: mockEmailSender,
 	}
 
@@ -193,7 +200,9 @@ func TestProcessReturnsNilIfAllCorrect(t *testing.T) {
 	mockCSVReader := mocks.NewCSVReader(t)
 	mockEmailSender := mocks.NewEmailSender(t)
 	service := Service{
-		CSVReader:   mockCSVReader,
+		TransactionsReader: TransactionsReader{
+			LocalCSVReader: mockCSVReader,
+		},
 		EmailSender: mockEmailSender,
 	}
 

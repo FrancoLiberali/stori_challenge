@@ -8,10 +8,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/FrancoLiberali/stori_challenge/app/adapters"
 	"github.com/FrancoLiberali/stori_challenge/app/models"
+	mocks "github.com/FrancoLiberali/stori_challenge/mocks/app/adapters"
 )
 
-func TestCSVRowsToTransactions(t *testing.T) {
+func TestParse(t *testing.T) {
+	reader := TransactionsReader{}
+
 	tests := []struct {
 		name       string
 		got        [][]string
@@ -32,7 +36,7 @@ func TestCSVRowsToTransactions(t *testing.T) {
 				{},
 			},
 			nil,
-			ErrParsingCsv,
+			ErrReadingTransactions,
 			"error parsing line 1: 3 elements expected, got 0",
 		},
 		{
@@ -41,7 +45,7 @@ func TestCSVRowsToTransactions(t *testing.T) {
 				{"asd", "asd"},
 			},
 			nil,
-			ErrParsingCsv,
+			ErrReadingTransactions,
 			"error parsing line 1: 3 elements expected, got 2",
 		},
 		{
@@ -50,7 +54,7 @@ func TestCSVRowsToTransactions(t *testing.T) {
 				{"asd", "7/15", "60.3"},
 			},
 			nil,
-			ErrParsingCsv,
+			ErrReadingTransactions,
 			"error parsing Id \"asd\" in line 1",
 		},
 		{
@@ -59,7 +63,7 @@ func TestCSVRowsToTransactions(t *testing.T) {
 				{"1", "asd", "60.3"},
 			},
 			nil,
-			ErrParsingCsv,
+			ErrReadingTransactions,
 			"error parsing Date \"asd\" in line 1",
 		},
 		{
@@ -68,7 +72,7 @@ func TestCSVRowsToTransactions(t *testing.T) {
 				{"1", "7/15", "asd"},
 			},
 			nil,
-			ErrParsingCsv,
+			ErrReadingTransactions,
 			"error parsing Transaction \"asd\" in line 1",
 		},
 		{
@@ -106,7 +110,7 @@ func TestCSVRowsToTransactions(t *testing.T) {
 		// table entry. These are shown separately
 		// when executing `go test -v`.
 		t.Run(tt.name, func(t *testing.T) {
-			ans, err := csvRowsToTransactions(tt.got)
+			ans, err := reader.parse(tt.got)
 
 			require.ErrorIs(t, err, tt.err)
 
@@ -117,4 +121,30 @@ func TestCSVRowsToTransactions(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestReadReturnsErrorIfLocalCSVReaderReturnsError(t *testing.T) {
+	mockLocalCSVReader := mocks.NewCSVReader(t)
+	reader := TransactionsReader{
+		LocalCSVReader: mockLocalCSVReader,
+	}
+
+	mockLocalCSVReader.On("Read", "not_found.csv").Return(nil, adapters.ErrReadingFile)
+
+	_, err := reader.Read("not_found.csv")
+	require.ErrorIs(t, err, ErrReadingTransactions)
+	require.ErrorContains(t, err, adapters.ErrReadingFile.Error())
+}
+
+func TestReadReturnsErrorIfS3CSVReaderReturnsError(t *testing.T) {
+	mockLocalCSVReader := mocks.NewCSVReader(t)
+	reader := TransactionsReader{
+		S3CSVReader: mockLocalCSVReader,
+	}
+
+	mockLocalCSVReader.On("Read", "not_found.csv").Return(nil, adapters.ErrReadingFile)
+
+	_, err := reader.Read("s3://not_found.csv")
+	require.ErrorIs(t, err, ErrReadingTransactions)
+	require.ErrorContains(t, err, adapters.ErrReadingFile.Error())
 }

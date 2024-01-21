@@ -9,7 +9,7 @@ import (
 )
 
 func TestLocalCSVReader(t *testing.T) {
-	reader := LocalCsvReader{}
+	reader := LocalCSVReader{}
 
 	tests := []struct {
 		setup      func(t *testing.T)

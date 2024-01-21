@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/antihax/optional v1.0.0
+	github.com/aws/aws-sdk-go v1.50.0
 	github.com/cucumber/godog v0.13.0
 	github.com/cucumber/messages/go/v21 v21.0.1
 	github.com/elliotchance/pie/v2 v2.8.0
@@ -18,6 +19,7 @@ require (
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-memdb v1.3.4 // indirect
 	github.com/hashicorp/golang-lru v1.0.2 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/mailslurp/mailslurp-client-go v0.0.0-20230614101136-8f84f48ff425
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect

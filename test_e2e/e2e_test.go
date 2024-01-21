@@ -1,14 +1,18 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/csv"
+	"io"
 	"log"
 	"os"
 	"os/exec"
-	"path/filepath"
 	"testing"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/colors"
 	messages "github.com/cucumber/messages/go/v21"
@@ -25,8 +29,10 @@ var (
 )
 
 const (
-	localCsvFileDir = "data"
-	localFileName   = "local_csv_file.csv"
+	csvFileName    = "csv_file.csv"
+	s3BucketRegion = "us-east-2"
+	s3Protocol     = "s3://"
+	s3BucketName   = "fl-stori-challenge"
 )
 
 func init() {
@@ -61,20 +67,15 @@ func TestFeatures(t *testing.T) {
 }
 
 func InitializeScenario(sc *godog.ScenarioContext) {
+	sc.Step(`^there is a S3 CSV file with following data$`, s3CSVFile)
 	sc.Step(`^there is a local CSV file with following data$`, localCSVFile)
 	sc.Step(`^the system is executed$`, executeSystem)
 	sc.Step(`^I receive an email with subject "([^"]*)" and with the following information$`, iReceiveTheEmail)
 }
 
-// Creates a CSV file called local_csv_file.csv with the content of the godog.Table
+// Creates in local a CSV file called csv_file.csv with the content of the godog.Table
 func localCSVFile(fileContent *godog.Table) error {
-	filePath := filepath.Join("data", localFileName)
-
-	if _, err := os.Stat("/path/to/your-file"); os.IsNotExist(err) {
-		os.MkdirAll(localCsvFileDir, 0o700) // Create your file
-	}
-
-	csvFile, err := os.Create(filePath)
+	csvFile, err := os.Create(csvFileName)
 	if err != nil {
 		return err
 	}
@@ -94,7 +95,54 @@ func localCSVFile(fileContent *godog.Table) error {
 
 	csvWriter.Flush()
 
-	fileName = localFileName
+	fileName = csvFileName
+
+	return nil
+}
+
+// Creates in s3 a CSV file called csv_file.csv with the content of the godog.Table
+func s3CSVFile(fileContent *godog.Table) error {
+	err := localCSVFile(fileContent)
+	if err != nil {
+		return err
+	}
+
+	sess, err := session.NewSession(&aws.Config{
+		Region: aws.String(s3BucketRegion),
+	})
+	if err != nil {
+		return err
+	}
+
+	svc := s3.New(sess)
+
+	file, err := os.Open(csvFileName)
+	if err != nil {
+		return err
+	}
+
+	defer file.Close()
+
+	// Read the contents of the file into a buffer
+	var buf bytes.Buffer
+	if _, err = io.Copy(&buf, file); err != nil {
+		return err
+	}
+
+	acl := "public-read"
+
+	// Upload the contents of the buffer to S3
+	_, err = svc.PutObject(&s3.PutObjectInput{
+		ACL:    &acl,
+		Bucket: aws.String(s3BucketName),
+		Key:    aws.String(csvFileName),
+		Body:   bytes.NewReader(buf.Bytes()),
+	})
+	if err != nil {
+		return err
+	}
+
+	fileName = s3Protocol + s3BucketName + "/" + csvFileName
 
 	return nil
 }
