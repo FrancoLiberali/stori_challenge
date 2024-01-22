@@ -48,14 +48,14 @@ func (reader TransactionsReader) Read(csvFileName string) ([]models.Transaction,
 		return nil, fmt.Errorf("%w: %s", ErrReadingTransactions, err.Error())
 	}
 
-	return reader.parse(csvRows)
+	return reader.parse(csvRows, csvFileName)
 }
 
 // Parse transforms a list of csv rows into a list of models.Transaction,
 // converting each cell of the row in the correct type.
 //
 // Returns the list of transactions or ErrParsingCsv if there is an error during type conversion
-func (reader TransactionsReader) parse(csvRows [][]string) ([]models.Transaction, error) {
+func (reader TransactionsReader) parse(csvRows [][]string, csvFileName string) ([]models.Transaction, error) {
 	// create list with the same size as csvRows
 	transactions := make([]models.Transaction, 0, len(csvRows))
 
@@ -87,9 +87,10 @@ func (reader TransactionsReader) parse(csvRows [][]string) ([]models.Transaction
 		}
 
 		transactions = append(transactions, models.Transaction{
-			ID:     id,
-			Date:   date,
-			Amount: amount,
+			IDInFile: id,
+			FileName: csvFileName,
+			Date:     date,
+			Amount:   amount,
 		})
 	}
 

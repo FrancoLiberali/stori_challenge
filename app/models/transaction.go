@@ -4,12 +4,17 @@ import (
 	"time"
 
 	"github.com/shopspring/decimal"
+
+	"github.com/FrancoLiberali/cql/model"
 )
 
 const AmountBytes = 64
 
 type Transaction struct {
-	ID     uint
-	Date   time.Time
-	Amount decimal.Decimal
+	model.UIntModel
+
+	IDInFile uint
+	FileName string
+	Date     time.Time
+	Amount   decimal.Decimal
 }

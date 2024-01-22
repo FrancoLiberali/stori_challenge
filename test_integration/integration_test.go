@@ -1,73 +1,52 @@
 package testintegration
 
 import (
-	"html/template"
-	"strings"
+	"fmt"
+	"log"
 	"testing"
+	"time"
 
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 
-	"github.com/FrancoLiberali/stori_challenge/app/adapters"
-	mocks "github.com/FrancoLiberali/stori_challenge/app/mocks/adapters"
-	"github.com/FrancoLiberali/stori_challenge/app/service"
+	"github.com/FrancoLiberali/cql/logger"
 )
 
-func TestProcessLocalCSVFileSendsEmail(t *testing.T) {
-	mockEmailSender := mocks.NewEmailSender(t)
-	storiService := service.Service{
-		TransactionsReader: service.TransactionsReader{
-			LocalCSVReader: adapters.LocalCSVReader{},
-		},
-		EmailService: service.EmailService{
-			Template:    template.Must(template.ParseFiles("../app/html/email.html")),
-			EmailSender: mockEmailSender,
-		},
+const (
+	username = "stori"
+	password = "stori_challenge2024"
+	host     = "localhost"
+	port     = 5432
+	sslMode  = "disable"
+	dbName   = "stori_db"
+)
+
+func TestMain(t *testing.T) {
+	db, err := NewDBConnection()
+	if err != nil {
+		log.Fatalln(err)
 	}
 
-	mockEmailSender.On(
-		"Send",
-		"client@mail.com",
-		"Stori transaction summary",
-		mock.MatchedBy(func(emailBody string) bool {
-			return strings.Contains(emailBody, "39.74") && strings.Contains(emailBody, "-15.38") && strings.Contains(emailBody, "35.25")
-		}),
-	).Return(nil)
+	err = db.AutoMigrate(ListOfTables...)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-	err := storiService.Process("../data/txns1.csv", "client@mail.com")
-	require.NoError(t, err)
+	suite.Run(t, &IntTestSuite{db: db})
 }
 
-func TestProcessS3CSVFileSendsEmail(t *testing.T) {
-	mockEmailSender := mocks.NewEmailSender(t)
-	mockS3Reader := mocks.NewCSVReader(t)
-	storiService := service.Service{
-		TransactionsReader: service.TransactionsReader{
-			S3CSVReader: mockS3Reader,
-		},
-		EmailService: service.EmailService{
-			Template:    template.Must(template.ParseFiles("../app/html/email.html")),
-			EmailSender: mockEmailSender,
-		},
-	}
-
-	mockS3Reader.On("Read", "fl-stori-challenge/txns1.csv").Return(
-		[][]string{
-			{"0", "7/15", "+60.5"},
-			{"1", "7/28", "-10.3"},
-			{"2", "8/2", "-20.46"},
-			{"3", "8/13", "+10"},
-		}, nil,
+func NewDBConnection() (*gorm.DB, error) {
+	dialector := postgres.Open(
+		fmt.Sprintf(
+			"user=%s password=%s host=%s port=%d sslmode=%s dbname=%s",
+			username, password, host, port, sslMode, dbName,
+		),
 	)
-	mockEmailSender.On(
-		"Send",
-		"client@mail.com",
-		"Stori transaction summary",
-		mock.MatchedBy(func(emailBody string) bool {
-			return strings.Contains(emailBody, "39.74") && strings.Contains(emailBody, "-15.38") && strings.Contains(emailBody, "35.25")
-		}),
-	).Return(nil)
 
-	err := storiService.Process("s3://fl-stori-challenge/txns1.csv", "client@mail.com")
-	require.NoError(t, err)
+	return OpenWithRetry(
+		dialector,
+		logger.Default.ToLogMode(logger.Info),
+		10, time.Duration(5)*time.Second,
+	)
 }

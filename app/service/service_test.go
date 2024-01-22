@@ -22,7 +22,7 @@ func TestCalculateTotalBalance(t *testing.T) {
 		got  []models.Transaction
 		want decimal.Decimal
 	}{
-		{"0 transactions returns 0", []models.Transaction{}, decimal.NewFromInt(0)},
+		{"0 transactions returns 0", []models.Transaction{}, decimal.Zero},
 		{"1 transaction returns first one", []models.Transaction{{Amount: decimal.NewFromFloat(60.5)}}, decimal.NewFromFloat(60.5)},
 		{"multiple transaction returns sum", []models.Transaction{
 			{Amount: decimal.NewFromFloat(60.5)},
@@ -170,23 +170,73 @@ func TestProcessReturnsErrorIfCSVCantBeParsed(t *testing.T) {
 		LocalCSVReader: mockCSVReader,
 	}}
 
-	mockCSVReader.On("Read", "found.csv").Return([][]string{{"asd"}}, nil)
+	fileName := "found.csv"
 
-	err := processService.Process("found.csv", "client@mail.com")
+	mockCSVReader.On("Read", fileName).Return([][]string{{"asd"}}, nil)
+
+	err := processService.Process(fileName, "client@mail.com")
 	require.ErrorIs(t, err, service.ErrReadingTransactions)
+}
+
+func TestReturnsErrorIfErrorIsWhileApplyingTransactions(t *testing.T) {
+	mockCSVReader := mocksAdapters.NewCSVReader(t)
+	mockTransactionService := mocksService.NewITransactionService(t)
+	processService := service.Service{
+		TransactionsReader: service.TransactionsReader{
+			LocalCSVReader: mockCSVReader,
+		},
+		TransactionService: mockTransactionService,
+	}
+
+	fileName := "correct.csv"
+
+	mockCSVReader.On("Read", fileName).Return([][]string{{"0", "7/15", "+60.5"}}, nil)
+	mockTransactionService.On(
+		"Apply",
+		"client@mail.com",
+		[]models.Transaction{
+			{
+				IDInFile: 0,
+				FileName: fileName,
+				Date:     time.Date(time.Now().Year(), 7, 15, 0, 0, 0, 0, time.UTC),
+				Amount:   decimal.NewFromFloat(60.5),
+			},
+		},
+		decimal.NewFromFloat(60.5),
+	).Return(service.ErrApplyingTransactions)
+
+	err := processService.Process(fileName, "client@mail.com")
+	require.ErrorIs(t, err, service.ErrApplyingTransactions)
 }
 
 func TestReturnsErrorIfErrorIsProducedWhileSendingEmail(t *testing.T) {
 	mockCSVReader := mocksAdapters.NewCSVReader(t)
+	mockTransactionService := mocksService.NewITransactionService(t)
 	mockEmailSender := mocksService.NewIEmailService(t)
 	processService := service.Service{
 		TransactionsReader: service.TransactionsReader{
 			LocalCSVReader: mockCSVReader,
 		},
-		EmailService: mockEmailSender,
+		TransactionService: mockTransactionService,
+		EmailService:       mockEmailSender,
 	}
 
-	mockCSVReader.On("Read", "correct.csv").Return([][]string{{"0", "7/15", "+60.5"}}, nil)
+	fileName := "correct.csv"
+
+	mockCSVReader.On("Read", fileName).Return([][]string{{"0", "7/15", "+60.5"}}, nil)
+	mockTransactionService.On(
+		"Apply",
+		"client@mail.com",
+		[]models.Transaction{
+			{
+				IDInFile: 0,
+				FileName: fileName,
+				Date:     time.Date(time.Now().Year(), 7, 15, 0, 0, 0, 0, time.UTC),
+				Amount:   decimal.NewFromFloat(60.5),
+			},
+		},
+		decimal.NewFromFloat(60.5),
+	).Return(nil)
 	mockEmailSender.On(
 		"Send",
 		"client@mail.com",
@@ -194,25 +244,42 @@ func TestReturnsErrorIfErrorIsProducedWhileSendingEmail(t *testing.T) {
 		[]service.TransactionsPerMonth{
 			{Month: time.Date(time.Now().Year(), 7, 1, 0, 0, 0, 0, time.UTC), Amount: 1},
 		},
-		decimal.NewFromInt(0),
+		decimal.Zero,
 		decimal.NewFromFloat(60.5),
 	).Return(adapters.ErrSendingEmail)
 
-	err := processService.Process("correct.csv", "client@mail.com")
+	err := processService.Process(fileName, "client@mail.com")
 	require.ErrorIs(t, err, adapters.ErrSendingEmail)
 }
 
 func TestProcessReturnsNilIfAllCorrect(t *testing.T) {
 	mockCSVReader := mocksAdapters.NewCSVReader(t)
+	mockTransactionService := mocksService.NewITransactionService(t)
 	mockEmailSender := mocksService.NewIEmailService(t)
 	processService := service.Service{
 		TransactionsReader: service.TransactionsReader{
 			LocalCSVReader: mockCSVReader,
 		},
-		EmailService: mockEmailSender,
+		TransactionService: mockTransactionService,
+		EmailService:       mockEmailSender,
 	}
 
-	mockCSVReader.On("Read", "correct.csv").Return([][]string{{"0", "7/15", "+60.5"}}, nil)
+	fileName := "correct.csv"
+
+	mockCSVReader.On("Read", fileName).Return([][]string{{"0", "7/15", "+60.5"}}, nil)
+	mockTransactionService.On(
+		"Apply",
+		"client@mail.com",
+		[]models.Transaction{
+			{
+				IDInFile: 0,
+				FileName: fileName,
+				Date:     time.Date(time.Now().Year(), 7, 15, 0, 0, 0, 0, time.UTC),
+				Amount:   decimal.NewFromFloat(60.5),
+			},
+		},
+		decimal.NewFromFloat(60.5),
+	).Return(nil)
 	mockEmailSender.On(
 		"Send",
 		"client@mail.com",
@@ -220,10 +287,10 @@ func TestProcessReturnsNilIfAllCorrect(t *testing.T) {
 		[]service.TransactionsPerMonth{
 			{Month: time.Date(time.Now().Year(), 7, 1, 0, 0, 0, 0, time.UTC), Amount: 1},
 		},
-		decimal.NewFromInt(0),
+		decimal.Zero,
 		decimal.NewFromFloat(60.5),
 	).Return(nil)
 
-	err := processService.Process("correct.csv", "client@mail.com")
+	err := processService.Process(fileName, "client@mail.com")
 	require.NoError(t, err)
 }

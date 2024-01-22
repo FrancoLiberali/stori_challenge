@@ -13,6 +13,7 @@ import (
 type Service struct {
 	TransactionsReader TransactionsReader
 	EmailService       IEmailService
+	TransactionService ITransactionService
 }
 
 type TransactionsPerMonth struct {
@@ -30,11 +31,18 @@ func (service Service) Process(csvFileName, destinationEmail string) error {
 		return err
 	}
 
+	totalBalance := service.CalculateTotalBalance(transactions)
+
+	err = service.TransactionService.Apply(destinationEmail, transactions, totalBalance)
+	if err != nil {
+		return err
+	}
+
 	avgDebit, avgCredit := service.CalculateAverageDebitAndCredit(transactions)
 
 	return service.EmailService.Send(
 		destinationEmail,
-		service.CalculateTotalBalance(transactions),
+		totalBalance,
 		service.CalculateTransactionsPerMonth(transactions),
 		avgDebit, avgCredit,
 	)
@@ -45,7 +53,7 @@ func (service Service) CalculateTotalBalance(transactions []models.Transaction) 
 	amounts := transactionsToAmounts(transactions)
 
 	if len(amounts) == 0 {
-		return decimal.NewFromInt(0)
+		return decimal.Zero
 	}
 
 	if len(amounts) == 1 {
@@ -87,11 +95,11 @@ func (service Service) CalculateAverageDebitAndCredit(transactions []models.Tran
 	amounts := transactionsToAmounts(transactions)
 
 	debits := pie.Filter(amounts, func(amount decimal.Decimal) bool {
-		return amount.LessThan(decimal.NewFromInt(0))
+		return amount.LessThan(decimal.Zero)
 	})
 
 	credits := pie.Filter(amounts, func(amount decimal.Decimal) bool {
-		return amount.GreaterThan(decimal.NewFromInt(0))
+		return amount.GreaterThan(decimal.Zero)
 	})
 
 	return calculateAverage(debits), calculateAverage(credits)
@@ -100,7 +108,7 @@ func (service Service) CalculateAverageDebitAndCredit(transactions []models.Tran
 // calculateAverage calculates the average of a list of amount
 func calculateAverage(amounts []decimal.Decimal) decimal.Decimal {
 	if len(amounts) == 0 {
-		return decimal.NewFromInt(0)
+		return decimal.Zero
 	}
 
 	if len(amounts) == 1 {
