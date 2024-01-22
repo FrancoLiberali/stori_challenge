@@ -11,6 +11,7 @@ import (
 
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/stori_challenge/app/adapters"
+	"github.com/FrancoLiberali/stori_challenge/app/models"
 	"github.com/FrancoLiberali/stori_challenge/app/repository"
 	"github.com/FrancoLiberali/stori_challenge/app/service"
 )
@@ -64,6 +65,14 @@ func NewService() (*service.Service, error) {
 			dbUser, dbPassword, dbURL, dbPort, dbSSL, dbName,
 		),
 	))
+	if err != nil {
+		return nil, err
+	}
+
+	err = gormDB.AutoMigrate(
+		models.User{},
+		models.Transaction{},
+	)
 	if err != nil {
 		return nil, err
 	}
