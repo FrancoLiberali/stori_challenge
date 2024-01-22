@@ -203,7 +203,7 @@ func TestReturnsErrorIfErrorIsWhileApplyingTransactions(t *testing.T) {
 			},
 		},
 		decimal.NewFromFloat(60.5),
-	).Return(service.ErrApplyingTransactions)
+	).Return(nil, service.ErrApplyingTransactions)
 
 	err := processService.Process(fileName, "client@mail.com")
 	require.ErrorIs(t, err, service.ErrApplyingTransactions)
@@ -222,11 +222,13 @@ func TestReturnsErrorIfErrorIsProducedWhileSendingEmail(t *testing.T) {
 	}
 
 	fileName := "correct.csv"
+	email := "client@mail.com"
+	user := &models.User{Email: email, Balance: decimal.NewFromFloat(60.5)}
 
 	mockCSVReader.On("Read", fileName).Return([][]string{{"0", "7/15", "+60.5"}}, nil)
 	mockTransactionService.On(
 		"Apply",
-		"client@mail.com",
+		email,
 		[]models.Transaction{
 			{
 				IDInFile: 0,
@@ -236,10 +238,10 @@ func TestReturnsErrorIfErrorIsProducedWhileSendingEmail(t *testing.T) {
 			},
 		},
 		decimal.NewFromFloat(60.5),
-	).Return(nil)
+	).Return(user, nil)
 	mockEmailSender.On(
 		"Send",
-		"client@mail.com",
+		user,
 		decimal.NewFromFloat(60.5),
 		[]service.TransactionsPerMonth{
 			{Month: time.Date(time.Now().Year(), 7, 1, 0, 0, 0, 0, time.UTC), Amount: 1},
@@ -248,7 +250,7 @@ func TestReturnsErrorIfErrorIsProducedWhileSendingEmail(t *testing.T) {
 		decimal.NewFromFloat(60.5),
 	).Return(adapters.ErrSendingEmail)
 
-	err := processService.Process(fileName, "client@mail.com")
+	err := processService.Process(fileName, email)
 	require.ErrorIs(t, err, adapters.ErrSendingEmail)
 }
 
@@ -265,11 +267,13 @@ func TestProcessReturnsNilIfAllCorrect(t *testing.T) {
 	}
 
 	fileName := "correct.csv"
+	email := "client@mail.com"
+	user := &models.User{Email: email, Balance: decimal.NewFromFloat(60.5)}
 
 	mockCSVReader.On("Read", fileName).Return([][]string{{"0", "7/15", "+60.5"}}, nil)
 	mockTransactionService.On(
 		"Apply",
-		"client@mail.com",
+		email,
 		[]models.Transaction{
 			{
 				IDInFile: 0,
@@ -279,10 +283,10 @@ func TestProcessReturnsNilIfAllCorrect(t *testing.T) {
 			},
 		},
 		decimal.NewFromFloat(60.5),
-	).Return(nil)
+	).Return(user, nil)
 	mockEmailSender.On(
 		"Send",
-		"client@mail.com",
+		user,
 		decimal.NewFromFloat(60.5),
 		[]service.TransactionsPerMonth{
 			{Month: time.Date(time.Now().Year(), 7, 1, 0, 0, 0, 0, time.UTC), Amount: 1},

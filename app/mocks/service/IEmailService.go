@@ -6,6 +6,8 @@ import (
 	decimal "github.com/shopspring/decimal"
 	mock "github.com/stretchr/testify/mock"
 
+	models "github.com/FrancoLiberali/stori_challenge/app/models"
+
 	service "github.com/FrancoLiberali/stori_challenge/app/service"
 )
 
@@ -14,17 +16,17 @@ type IEmailService struct {
 	mock.Mock
 }
 
-// Send provides a mock function with given fields: destinationEmail, totalBalance, transactionsPerMonth, avgDebit, avgCredit
-func (_m *IEmailService) Send(destinationEmail string, totalBalance decimal.Decimal, transactionsPerMonth []service.TransactionsPerMonth, avgDebit decimal.Decimal, avgCredit decimal.Decimal) error {
-	ret := _m.Called(destinationEmail, totalBalance, transactionsPerMonth, avgDebit, avgCredit)
+// Send provides a mock function with given fields: user, transactionBalance, transactionsPerMonth, avgDebit, avgCredit
+func (_m *IEmailService) Send(user *models.User, transactionBalance decimal.Decimal, transactionsPerMonth []service.TransactionsPerMonth, avgDebit decimal.Decimal, avgCredit decimal.Decimal) error {
+	ret := _m.Called(user, transactionBalance, transactionsPerMonth, avgDebit, avgCredit)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Send")
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(string, decimal.Decimal, []service.TransactionsPerMonth, decimal.Decimal, decimal.Decimal) error); ok {
-		r0 = rf(destinationEmail, totalBalance, transactionsPerMonth, avgDebit, avgCredit)
+	if rf, ok := ret.Get(0).(func(*models.User, decimal.Decimal, []service.TransactionsPerMonth, decimal.Decimal, decimal.Decimal) error); ok {
+		r0 = rf(user, transactionBalance, transactionsPerMonth, avgDebit, avgCredit)
 	} else {
 		r0 = ret.Error(0)
 	}

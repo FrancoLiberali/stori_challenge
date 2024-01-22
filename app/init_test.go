@@ -12,16 +12,16 @@ func TestNewServiceReturnsErrorIfPublicAPIKeyNotConfigured(t *testing.T) {
 }
 
 func TestNewServiceReturnsErrorIfPrivateAPIKeyNotConfigured(t *testing.T) {
-	t.Setenv(emailPublicAPIKeyEnvVar, "something")
+	t.Setenv(EmailPublicAPIKeyEnvVar, "something")
 
 	_, err := NewService()
 	require.ErrorIs(t, err, ErrEmailAPIKeyNotConfigured)
 }
 
-func TestNewServiceWorksIfBothAPIKeysAreConfigured(t *testing.T) {
-	t.Setenv(emailPublicAPIKeyEnvVar, "something_public")
-	t.Setenv(emailPrivateAPIKeyEnvVar, "something_private")
+func TestNewServiceReturnsErrorIfDatabaseInfoIsNotConfigured(t *testing.T) {
+	t.Setenv(EmailPublicAPIKeyEnvVar, "something_public")
+	t.Setenv(EmailPrivateAPIKeyEnvVar, "something_private")
 
 	_, err := NewService()
-	require.NoError(t, err)
+	require.ErrorIs(t, err, ErrDatabaseNotConfigured)
 }

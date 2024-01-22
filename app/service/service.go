@@ -31,9 +31,9 @@ func (service Service) Process(csvFileName, destinationEmail string) error {
 		return err
 	}
 
-	totalBalance := service.CalculateTotalBalance(transactions)
+	transactionsBalance := service.CalculateTotalBalance(transactions)
 
-	err = service.TransactionService.Apply(destinationEmail, transactions, totalBalance)
+	user, err := service.TransactionService.Apply(destinationEmail, transactions, transactionsBalance)
 	if err != nil {
 		return err
 	}
@@ -41,8 +41,8 @@ func (service Service) Process(csvFileName, destinationEmail string) error {
 	avgDebit, avgCredit := service.CalculateAverageDebitAndCredit(transactions)
 
 	return service.EmailService.Send(
-		destinationEmail,
-		totalBalance,
+		user,
+		transactionsBalance,
 		service.CalculateTransactionsPerMonth(transactions),
 		avgDebit, avgCredit,
 	)

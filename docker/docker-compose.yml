@@ -37,11 +37,12 @@ services:
     environment:
       EMAIL_PUBLIC_API_KEY: "${EMAIL_PUBLIC_API_KEY}"
       EMAIL_PRIVATE_API_KEY: "${EMAIL_PRIVATE_API_KEY}"
-      POSTGRES_URL: db
-      POSTGRES_PORT: 5432
-      POSTGRES_USER: stori
-      POSTGRES_PASSWORD: stori_challenge2024
-      POSTGRES_DB: stori_db
+      DB_URL: db
+      DB_PORT: 5432
+      DB_USER: stori
+      DB_PASSWORD: stori_challenge2024
+      DB_NAME: stori_db
+      DB_SSL: disable
     command: [ "-file", "${FILE}", "-email", "${EMAIL}" ]
     volumes:
       - ../data:/data:ro

@@ -15,21 +15,33 @@ type ITransactionService struct {
 }
 
 // Apply provides a mock function with given fields: email, transactions, transactionsBalance
-func (_m *ITransactionService) Apply(email string, transactions []models.Transaction, transactionsBalance decimal.Decimal) error {
+func (_m *ITransactionService) Apply(email string, transactions []models.Transaction, transactionsBalance decimal.Decimal) (*models.User, error) {
 	ret := _m.Called(email, transactions, transactionsBalance)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Apply")
 	}
 
-	var r0 error
-	if rf, ok := ret.Get(0).(func(string, []models.Transaction, decimal.Decimal) error); ok {
+	var r0 *models.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string, []models.Transaction, decimal.Decimal) (*models.User, error)); ok {
+		return rf(email, transactions, transactionsBalance)
+	}
+	if rf, ok := ret.Get(0).(func(string, []models.Transaction, decimal.Decimal) *models.User); ok {
 		r0 = rf(email, transactions, transactionsBalance)
 	} else {
-		r0 = ret.Error(0)
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*models.User)
+		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(string, []models.Transaction, decimal.Decimal) error); ok {
+		r1 = rf(email, transactions, transactionsBalance)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // NewITransactionService creates a new instance of ITransactionService. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

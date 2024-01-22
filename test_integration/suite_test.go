@@ -2,6 +2,7 @@ package testintegration
 
 import (
 	"html/template"
+	"strconv"
 	"strings"
 
 	"github.com/shopspring/decimal"
@@ -10,7 +11,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/FrancoLiberali/cql"
-	"github.com/FrancoLiberali/stori_challenge/app/adapters"
+	"github.com/FrancoLiberali/stori_challenge/app"
 	mocks "github.com/FrancoLiberali/stori_challenge/app/mocks/adapters"
 	"github.com/FrancoLiberali/stori_challenge/app/models"
 	"github.com/FrancoLiberali/stori_challenge/app/repository"
@@ -23,25 +24,27 @@ type IntTestSuite struct {
 }
 
 func (ts *IntTestSuite) SetupTest() {
+	ts.T().Setenv(app.EmailPublicAPIKeyEnvVar, "asd")
+	ts.T().Setenv(app.EmailPrivateAPIKeyEnvVar, "asd")
+	ts.T().Setenv(app.DBURLEnvVar, host)
+	ts.T().Setenv(app.DBPortEnvVar, strconv.Itoa(port))
+	ts.T().Setenv(app.DBUserEnvVar, username)
+	ts.T().Setenv(app.DBPasswordEnvVar, password)
+	ts.T().Setenv(app.DBNameEnvVar, dbName)
+	ts.T().Setenv(app.DBSSLEnvVar, sslMode)
 	CleanDB(ts.db)
 }
 
 func (ts *IntTestSuite) TestProcessLocalCSVFileSendsEmailWhenUserDoesNotExists() {
 	mockEmailSender := mocks.NewEmailSender(ts.T())
 	userRepository := repository.UserRepository{}
-	storiService := service.Service{
-		TransactionsReader: service.TransactionsReader{
-			LocalCSVReader: adapters.LocalCSVReader{},
-		},
-		TransactionService: service.TransactionService{
-			DB:                    ts.db,
-			UserRepository:        userRepository,
-			TransactionRepository: repository.TransactionRepository{},
-		},
-		EmailService: service.EmailService{
-			Template:    template.Must(template.ParseFiles("../app/html/email.html")),
-			EmailSender: mockEmailSender,
-		},
+
+	storiService, err := app.NewService()
+	ts.Require().NoError(err)
+
+	storiService.EmailService = service.EmailService{
+		Template:    template.Must(template.ParseFiles("../app/html/email.html")),
+		EmailSender: mockEmailSender,
 	}
 
 	mockEmailSender.On(
@@ -53,7 +56,7 @@ func (ts *IntTestSuite) TestProcessLocalCSVFileSendsEmailWhenUserDoesNotExists()
 		}),
 	).Return(nil)
 
-	err := storiService.Process("../data/txns1.csv", "client@mail.com")
+	err = storiService.Process("../data/txns1.csv", "client@mail.com")
 	ts.Require().NoError(err)
 
 	// check that transactions are created
@@ -72,19 +75,12 @@ func (ts *IntTestSuite) TestProcessLocalCSVFileSendsEmailWhenUserDoesNotExists()
 func (ts *IntTestSuite) TestProcessLocalCSVFileSendsEmailWhenUserExists() {
 	mockEmailSender := mocks.NewEmailSender(ts.T())
 	userRepository := repository.UserRepository{}
-	storiService := service.Service{
-		TransactionsReader: service.TransactionsReader{
-			LocalCSVReader: adapters.LocalCSVReader{},
-		},
-		TransactionService: service.TransactionService{
-			DB:                    ts.db,
-			UserRepository:        userRepository,
-			TransactionRepository: repository.TransactionRepository{},
-		},
-		EmailService: service.EmailService{
-			Template:    template.Must(template.ParseFiles("../app/html/email.html")),
-			EmailSender: mockEmailSender,
-		},
+	storiService, err := app.NewService()
+	ts.Require().NoError(err)
+
+	storiService.EmailService = service.EmailService{
+		Template:    template.Must(template.ParseFiles("../app/html/email.html")),
+		EmailSender: mockEmailSender,
 	}
 
 	// create user
@@ -95,11 +91,14 @@ func (ts *IntTestSuite) TestProcessLocalCSVFileSendsEmailWhenUserExists() {
 		"client@mail.com",
 		"Stori transaction summary",
 		mock.MatchedBy(func(emailBody string) bool {
-			return strings.Contains(emailBody, "39.74") && strings.Contains(emailBody, "-15.38") && strings.Contains(emailBody, "35.25")
+			return strings.Contains(emailBody, "70.04") &&
+				strings.Contains(emailBody, "39.74") &&
+				strings.Contains(emailBody, "-15.38") &&
+				strings.Contains(emailBody, "35.25")
 		}),
 	).Return(nil)
 
-	err := storiService.Process("../data/txns1.csv", "client@mail.com")
+	err = storiService.Process("../data/txns1.csv", "client@mail.com")
 	ts.Require().NoError(err)
 
 	// check that transactions are created
@@ -118,19 +117,16 @@ func (ts *IntTestSuite) TestProcessLocalCSVFileSendsEmailWhenUserExists() {
 func (ts *IntTestSuite) TestProcessS3CSVFileSendsEmail() {
 	mockEmailSender := mocks.NewEmailSender(ts.T())
 	mockS3Reader := mocks.NewCSVReader(ts.T())
-	storiService := service.Service{
-		TransactionsReader: service.TransactionsReader{
-			S3CSVReader: mockS3Reader,
-		},
-		TransactionService: service.TransactionService{
-			DB:                    ts.db,
-			UserRepository:        repository.UserRepository{},
-			TransactionRepository: repository.TransactionRepository{},
-		},
-		EmailService: service.EmailService{
-			Template:    template.Must(template.ParseFiles("../app/html/email.html")),
-			EmailSender: mockEmailSender,
-		},
+	storiService, err := app.NewService()
+	ts.Require().NoError(err)
+
+	storiService.EmailService = service.EmailService{
+		Template:    template.Must(template.ParseFiles("../app/html/email.html")),
+		EmailSender: mockEmailSender,
+	}
+
+	storiService.TransactionsReader = service.TransactionsReader{
+		S3CSVReader: mockS3Reader,
 	}
 
 	mockS3Reader.On("Read", "fl-stori-challenge/txns1.csv").Return(
@@ -150,6 +146,6 @@ func (ts *IntTestSuite) TestProcessS3CSVFileSendsEmail() {
 		}),
 	).Return(nil)
 
-	err := storiService.Process("s3://fl-stori-challenge/txns1.csv", "client@mail.com")
+	err = storiService.Process("s3://fl-stori-challenge/txns1.csv", "client@mail.com")
 	ts.Require().NoError(err)
 }

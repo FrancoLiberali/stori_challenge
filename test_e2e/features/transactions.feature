@@ -13,7 +13,8 @@ Feature: Transaction processing
       | 3  | 8/13 | +10         |
     When the system is executed
     Then I receive an email with subject "Stori transaction summary" and with the following information
-      | Total balance                    | 39.74  |
+      | User balance                     | 39.74  |
+      | Transactions balance             | 39.74  |
       | Number of transactions in July   | 2      |
       | Number of transactions in August | 2      |
       | Average debit                    | -15.38 |

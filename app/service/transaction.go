@@ -14,7 +14,7 @@ import (
 
 type ITransactionService interface {
 	// Apply creates the transactions received by parameter and applies its total balance to the user's balance
-	Apply(email string, transactions []models.Transaction, transactionsBalance decimal.Decimal) error
+	Apply(email string, transactions []models.Transaction, transactionsBalance decimal.Decimal) (*models.User, error)
 }
 
 type TransactionService struct {
@@ -30,32 +30,30 @@ func (service TransactionService) Apply(
 	email string,
 	transactions []models.Transaction,
 	transactionsBalance decimal.Decimal,
-) error {
-	_, err := cql.Transaction(service.DB, func(tx *gorm.DB) (int, error) {
+) (*models.User, error) {
+	return cql.Transaction(service.DB, func(tx *gorm.DB) (*models.User, error) {
 		user, err := service.UserRepository.GetByEmail(tx, email)
 
 		if errors.Is(err, cql.ErrObjectNotFound) {
 			user = &models.User{Email: email, Balance: decimal.Zero}
 		} else if err != nil {
-			return 0, errApplyingTransactions(email, transactions, err)
+			return nil, errApplyingTransactions(email, transactions, err)
 		}
 
 		user.Balance = user.Balance.Add(transactionsBalance)
 
 		err = service.UserRepository.Save(tx, user)
 		if err != nil {
-			return 0, errApplyingTransactions(email, transactions, err)
+			return nil, errApplyingTransactions(email, transactions, err)
 		}
 
 		err = service.TransactionRepository.Create(tx, transactions)
 		if err != nil {
-			return 0, errApplyingTransactions(email, transactions, err)
+			return nil, errApplyingTransactions(email, transactions, err)
 		}
 
-		return 0, nil
+		return user, nil
 	})
-
-	return err
 }
 
 func errApplyingTransactions(email string, transactions []models.Transaction, internalError error) error {

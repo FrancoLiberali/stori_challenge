@@ -180,8 +180,10 @@ func iReceiveTheEmail(subject string, content *godog.Table) error {
 		value := row.Cells[1].Value
 
 		switch row.Cells[0].Value {
-		case "Total balance":
-			contains = fmt.Sprintf("<span>Total balance: <strong>$%s</strong></span>", value)
+		case "User balance":
+			contains = fmt.Sprintf("<span>Your balance: <strong>$%s</strong></span>", value)
+		case "Transactions balance":
+			contains = fmt.Sprintf(`<span class="tbal"><span><span><strong>$%s</strong></span></span></span>`, value)
 		case "Average credit":
 			contains = fmt.Sprintf(`<span class="avg-cre"><span><span><strong>$%s</strong></span></span></span>`, value)
 		case "Average debit":
