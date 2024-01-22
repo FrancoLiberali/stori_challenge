@@ -31,12 +31,13 @@ var (
 )
 
 const (
-	csvFileName    = "data/csv_file.csv"
-	csvFilePath    = "../" + csvFileName
-	s3BucketRegion = "us-east-2"
-	s3Protocol     = "s3://"
-	s3BucketName   = "fl-stori-challenge"
-	appName        = "../process.sh"
+	csvFileName       = "csv_file.csv"
+	csvFileNameInData = "data/" + csvFileName
+	csvFilePath       = "../" + csvFileNameInData
+	s3BucketRegion    = "us-east-2"
+	s3Protocol        = "s3://"
+	s3BucketName      = "fl-stori-challenge"
+	appName           = "../process.sh"
 )
 
 func init() {
@@ -99,7 +100,7 @@ func localCSVFile(fileContent *godog.Table) error {
 
 	csvWriter.Flush()
 
-	fileName = csvFileName
+	fileName = csvFileNameInData
 
 	return nil
 }
