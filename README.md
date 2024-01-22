@@ -12,10 +12,6 @@ Coding Challenge for Stori made by Franco Liberali
 - [Execution](#execution)
   - [Run on AWS Lambda](#run-on-aws-lambda)
   - [Run locally](#run-locally)
-    - [Run with docker](#run-with-docker)
-      - [Image from the container registry](#image-from-the-container-registry)
-      - [Build the image](#build-the-image)
-    - [Run with Go](#run-with-go)
 - [Practices used](#practices-used)
   - [Linting](#linting)
   - [Unit tests](#unit-tests)
@@ -55,49 +51,30 @@ The [CD](#cd) process updates the function each time a commit is made to the mai
 
 ### Run locally
 
-In the local version it is possible to use both local files and files hosted on AWS S3 (publicly).
+In the local version it is possible to use both local files and files hosted on AWS S3 (publicly). The execution is done using docker.
 
-#### Run with docker
+1. Install docker and compose plugin
+2. Set your environment variables by copying the docker/.env.example file to docker/.env:
 
-You can use the pre-built image or build it yourself.
+   ```bash
+   cp docker/.env.example docker/.env
+   ```
 
-##### Image from the container registry
+   :warning: To run it locally you will need a [mailjet](mailjet.com) key pair. In this case, the variables are already in the .env.example file to avoid the need for proofreaders to create an account, but in real life these credentials would never be shared (See [emails](#emails) for details).
+3. Execute it:
+   1. With a local file:
 
-The [CD](#cd) process updates the image in the container registry each time a commit is made to the main branch.
+      ```bash
+      ./process.sh data/txns2.csv you@email.com
+      ```
 
-1. Install docker
+   2. With a file in AWS S3:
 
-With local file:
+      ```bash
+      ./process.sh s3://fl-stori-challenge/txns2.csv you@email.com
+      ````
 
-2. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> -v $(pwd)/data:/data ghcr.io/francoliberali/stori_challenge:latest -file data/txns2.csv -email you@email.com`
-
-> :warning: To run it locally you will need a [mailjet](mailjet.com) key pair. See [emails](#emails) for details.
-
-With AWS S3 hosted file:
-
-2. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> ghcr.io/francoliberali/stori_challenge:latest -file s3://fl-stori-challenge/txns2.csv -email you@email.com`
-
-##### Build the image
-
-1. Install docker
-2. Clone this repository
-3. `docker build -t francoliberali/stori_challenge:latest .`
-4. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> -v $(pwd)/data:/data francoliberali/stori_challenge -file data/txns2.csv -email you@email.com`
-
-#### Run with Go
-
-1. Install Go 1.18+.
-2. Clone this repository
-3. `go mod download`
-
-Run it with go run:
-
-4. `EMAIL_PUBLIC_API_KEY=<public-api-key> EMAIL_PRIVATE_API_KEY=<private-api-key> go run . -file data/txns2.csv -email you@email.com`
-
-Or install it and then run it:
-
-4. `go install .`
-5. `EMAIL_PUBLIC_API_KEY=<public-api-key> EMAIL_PRIVATE_API_KEY=<private-api-key> stori_challenge -file data/txns2.csv -email you@email.com`
+   :warning: Don't forget to replace <you@email.com> with your email address
 
 ## Practices used
 
@@ -163,7 +140,7 @@ The continuous integration process is run every time a pull request or commit is
 
 ### CD
 
-The continuous delivery process is executed every time a commit is performed on the main branch and the CI process is successful. It builds the docker image and pushes it to the container registry and builds the AWS Lambda function and deploys it.
+The continuous delivery process is executed every time a commit is performed on the main branch and the CI process is successful. It builds the AWS Lambda function and deploys it.
 
 ### Hexagonal architecture
 

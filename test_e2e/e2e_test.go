@@ -35,6 +35,7 @@ const (
 	s3BucketRegion = "us-east-2"
 	s3Protocol     = "s3://"
 	s3BucketName   = "fl-stori-challenge"
+	appName        = "../process.sh"
 )
 
 func init() {
@@ -151,11 +152,7 @@ func s3CSVFile(fileContent *godog.Table) error {
 
 // Executes the transaction processing system
 func executeSystem() error {
-	app := "stori_challenge"
-	argFile := "-file"
-	argEmail := "-email"
-
-	output, err := exec.Command(app, argFile, fileName, argEmail, receiveInbox.EmailAddress).CombinedOutput()
+	output, err := exec.Command(appName, fileName, receiveInbox.EmailAddress).CombinedOutput()
 	if err != nil {
 		log.Println(string(output))
 	}

@@ -25,3 +25,4 @@ csv_file.csv
 stori_challenge
 aws_lambda/bootstrap
 aws_lambda/stori-challenge.zip
+.env
