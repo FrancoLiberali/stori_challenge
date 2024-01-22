@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"context"
 	"encoding/csv"
+	"fmt"
 	"io"
 	"log"
 	"os"
 	"os/exec"
+	"strings"
 	"testing"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -176,7 +178,23 @@ func iReceiveTheEmail(subject string, content *godog.Table) error {
 	}
 
 	for _, row := range content.Rows {
-		err = assertExpectedAndActual(assert.Contains, *email.Body, row.Cells[0].Value)
+		var contains string
+
+		value := row.Cells[1].Value
+
+		switch row.Cells[0].Value {
+		case "Total balance":
+			contains = fmt.Sprintf("<span>Total balance: <strong>$%s</strong></span>", value)
+		case "Average credit":
+			contains = fmt.Sprintf(`<span class="avg-cre"><span><span><strong>$%s</strong></span></span></span>`, value)
+		case "Average debit":
+			contains = fmt.Sprintf(`<span class="avg-de"><span><span><strong>$%s</strong></span></span></span>`, value)
+		default:
+			month := strings.TrimPrefix(row.Cells[0].Value, "Number of transactions in ")
+			contains = fmt.Sprintf(`<span class="n-%s"><span><span><strong>%s</strong></span></span></span>`, month, value)
+		}
+
+		err = assertExpectedAndActual(assert.Contains, *email.Body, contains)
 		if err != nil {
 			return err
 		}

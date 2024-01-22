@@ -27,8 +27,7 @@ func (sender MailJetEmailSender) Send(recipient, subject, body string) error {
 			From:     &mailjet.RecipientV31{Email: senderEmail, Name: senderName},
 			To:       &mailjet.RecipientsV31{mailjet.RecipientV31{Email: recipient}},
 			Subject:  subject,
-			TextPart: body,
-			// HTMLPart: "<h3>Dear passenger 1, welcome to <a href=\"https://www.mailjet.com/\">Mailjet</a>!</h3><br />May the delivery force be with you!",
+			HTMLPart: body,
 		},
 	}}
 

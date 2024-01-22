@@ -1,35 +1,24 @@
 package service
 
 import (
-	"fmt"
 	"sort"
 	"time"
 
 	"github.com/elliotchance/pie/v2"
 	"github.com/shopspring/decimal"
 
-	"github.com/FrancoLiberali/stori_challenge/app/adapters"
 	"github.com/FrancoLiberali/stori_challenge/app/models"
 )
 
 type Service struct {
 	TransactionsReader TransactionsReader
-	EmailSender        adapters.EmailSender
+	EmailService       IEmailService
 }
 
 type TransactionsPerMonth struct {
 	Month  time.Time
 	Amount int
 }
-
-const (
-	emailMessage = `
-Total balance is: %s
-%sAverage debit amount: %s
-Average credit amount: %s
-`
-	emailSubject = "Stori transaction summary"
-)
 
 // Process read csv file called csvFileName,
 // calculates total balance, number of transactions grouped by month
@@ -41,42 +30,14 @@ func (service Service) Process(csvFileName, destinationEmail string) error {
 		return err
 	}
 
-	totalBalance := service.CalculateTotalBalance(transactions)
-	transactionsPerMonth := service.CalculateTransactionsPerMonth(transactions)
 	avgDebit, avgCredit := service.CalculateAverageDebitAndCredit(transactions)
 
-	return service.EmailSender.Send(destinationEmail, emailSubject, fmt.Sprintf(
-		emailMessage,
-		totalBalance,
-		transactionsPerMonthToString(transactionsPerMonth),
-		avgDebit,
-		avgCredit,
-	))
-}
-
-// transactionsPerMonthToString transforms a list of transactions per month to string that can be sent to the user by email
-func transactionsPerMonthToString(transactionsPerMonth []TransactionsPerMonth) string {
-	result := ""
-
-	for _, transactionPerMonth := range transactionsPerMonth {
-		// add year if not current year
-		if transactionPerMonth.Month.Year() != time.Now().Year() {
-			result += fmt.Sprintf(
-				"Number of transactions in %s %d: %d\n",
-				transactionPerMonth.Month.Month().String(),
-				transactionPerMonth.Month.Year(),
-				transactionPerMonth.Amount,
-			)
-		} else {
-			result += fmt.Sprintf(
-				"Number of transactions in %s: %d\n",
-				transactionPerMonth.Month.Month().String(),
-				transactionPerMonth.Amount,
-			)
-		}
-	}
-
-	return result
+	return service.EmailService.Send(
+		destinationEmail,
+		service.CalculateTotalBalance(transactions),
+		service.CalculateTransactionsPerMonth(transactions),
+		avgDebit, avgCredit,
+	)
 }
 
 // CalculateTotalBalance calculates the total balance from a list of transactions as the sum of all transactions

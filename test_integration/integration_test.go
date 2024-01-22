@@ -1,8 +1,11 @@
 package testintegration
 
 import (
+	"html/template"
+	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
 	"github.com/FrancoLiberali/stori_challenge/app/adapters"
@@ -16,16 +19,20 @@ func TestProcessLocalCSVFileSendsEmail(t *testing.T) {
 		TransactionsReader: service.TransactionsReader{
 			LocalCSVReader: adapters.LocalCSVReader{},
 		},
-		EmailSender: mockEmailSender,
+		EmailService: service.EmailService{
+			Template:    template.Must(template.ParseFiles("../app/html/email.html")),
+			EmailSender: mockEmailSender,
+		},
 	}
 
-	mockEmailSender.On("Send", "client@mail.com", "Stori transaction summary", `
-Total balance is: 39.74
-Number of transactions in July: 2
-Number of transactions in August: 2
-Average debit amount: -15.38
-Average credit amount: 35.25
-`).Return(nil)
+	mockEmailSender.On(
+		"Send",
+		"client@mail.com",
+		"Stori transaction summary",
+		mock.MatchedBy(func(emailBody string) bool {
+			return strings.Contains(emailBody, "39.74") && strings.Contains(emailBody, "-15.38") && strings.Contains(emailBody, "35.25")
+		}),
+	).Return(nil)
 
 	err := storiService.Process("../data/txns1.csv", "client@mail.com")
 	require.NoError(t, err)
@@ -38,7 +45,10 @@ func TestProcessS3CSVFileSendsEmail(t *testing.T) {
 		TransactionsReader: service.TransactionsReader{
 			S3CSVReader: mockS3Reader,
 		},
-		EmailSender: mockEmailSender,
+		EmailService: service.EmailService{
+			Template:    template.Must(template.ParseFiles("../app/html/email.html")),
+			EmailSender: mockEmailSender,
+		},
 	}
 
 	mockS3Reader.On("Read", "fl-stori-challenge/txns1.csv").Return(
@@ -49,13 +59,14 @@ func TestProcessS3CSVFileSendsEmail(t *testing.T) {
 			{"3", "8/13", "+10"},
 		}, nil,
 	)
-	mockEmailSender.On("Send", "client@mail.com", "Stori transaction summary", `
-Total balance is: 39.74
-Number of transactions in July: 2
-Number of transactions in August: 2
-Average debit amount: -15.38
-Average credit amount: 35.25
-`).Return(nil)
+	mockEmailSender.On(
+		"Send",
+		"client@mail.com",
+		"Stori transaction summary",
+		mock.MatchedBy(func(emailBody string) bool {
+			return strings.Contains(emailBody, "39.74") && strings.Contains(emailBody, "-15.38") && strings.Contains(emailBody, "35.25")
+		}),
+	).Return(nil)
 
 	err := storiService.Process("s3://fl-stori-challenge/txns1.csv", "client@mail.com")
 	require.NoError(t, err)
