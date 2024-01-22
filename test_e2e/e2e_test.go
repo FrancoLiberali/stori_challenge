@@ -31,7 +31,8 @@ var (
 )
 
 const (
-	csvFileName    = "csv_file.csv"
+	csvFileName    = "data/csv_file.csv"
+	csvFilePath    = "../" + csvFileName
 	s3BucketRegion = "us-east-2"
 	s3Protocol     = "s3://"
 	s3BucketName   = "fl-stori-challenge"
@@ -78,7 +79,7 @@ func InitializeScenario(sc *godog.ScenarioContext) {
 
 // Creates in local a CSV file called csv_file.csv with the content of the godog.Table
 func localCSVFile(fileContent *godog.Table) error {
-	csvFile, err := os.Create(csvFileName)
+	csvFile, err := os.Create(csvFilePath)
 	if err != nil {
 		return err
 	}
@@ -119,7 +120,7 @@ func s3CSVFile(fileContent *godog.Table) error {
 
 	svc := s3.New(sess)
 
-	file, err := os.Open(csvFileName)
+	file, err := os.Open(csvFilePath)
 	if err != nil {
 		return err
 	}
