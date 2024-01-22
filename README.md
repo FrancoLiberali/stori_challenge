@@ -9,6 +9,8 @@
 
 Coding Challenge for Stori made by Franco Liberali
 
+- [Assumptions](#assumptions)
+- [Technical decisions](#technical-decisions)
 - [Execution](#execution)
   - [Run on AWS Lambda](#run-on-aws-lambda)
   - [Run locally](#run-locally)
@@ -30,6 +32,23 @@ Coding Challenge for Stori made by Franco Liberali
 - [The challenge](#the-challenge)
   - [Bonus points](#bonus-points)
   - [Delivery and code requirements](#delivery-and-code-requirements)
+
+## Assumptions
+
+Regarding bonus point 1:
+
+1. Transaction ids within the file are assumed to be unique within the file only, so a new unique id is generated to store a transaction in the database. The id within the file and the file name are also saved.
+2. It is assumed that users can be uniquely identified by their email address.
+3. It is assumed that the user to which the transactions apply is the same as the user to be notified.
+4. The balance of transactions is applied to the user's balance. In the notification email, the user's final balance is shown as "Your balance" and the transaction balance as "Transactions balance".
+
+For the local execution steps, a linux environment is assumed.
+
+## Technical decisions
+
+Regarding bonus point 1:
+
+1. Since no use of the information to be persisted is specified, there is no limitation on the database technology to be used. It is decided to use postgreSQL only for ease of use.
 
 ## Execution
 
@@ -97,7 +116,7 @@ make test_unit
 To ensure that they are unitary, mocks are used. They are generated using [mockery](https://vektra.github.io/mockery/latest/). To regenerate them, [install the dependencies](#dependencies) and run:
 
 ```bash
-go generate ./app/...
+cd app && go generate ./...
 ```
 
 ### Integration tests
@@ -113,7 +132,7 @@ make test_integration
 Feature tests (or e2e) are tests that cover the end-to-end system. They are located in the `test_e2e/` folder and are performed under the [BDD](#bdd--tdd) practice. They are executed during [continuous integration](#ci). To run them locally, run:
 
 ```bash
-EMAIL_PUBLIC_API_KEY=<public-api-key> EMAIL_PRIVATE_API_KEY=<private-api-key> make test_e2e
+make test_e2e
 ```
 
 For executing this, you will need to have configured your aws credentials in `~/.aws/credentials`. For details see <https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials>.
