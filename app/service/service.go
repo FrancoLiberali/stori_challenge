@@ -12,7 +12,7 @@ import (
 
 type Service struct {
 	TransactionsReader TransactionsReader
-	EmailService       EmailService
+	EmailService       IEmailService
 }
 
 type TransactionsPerMonth struct {
@@ -32,7 +32,7 @@ func (service Service) Process(csvFileName, destinationEmail string) error {
 
 	avgDebit, avgCredit := service.CalculateAverageDebitAndCredit(transactions)
 
-	return service.EmailService.send(
+	return service.EmailService.Send(
 		destinationEmail,
 		service.CalculateTotalBalance(transactions),
 		service.CalculateTransactionsPerMonth(transactions),

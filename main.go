@@ -8,7 +8,7 @@ import (
 	"github.com/FrancoLiberali/stori_challenge/app"
 )
 
-const helpHeader string = `Stori challenge by Franco Liberali.
+const helpHeader = `Stori challenge by Franco Liberali.
 Usage: stori_challenge [FLAGS]
 
 FLAGS:

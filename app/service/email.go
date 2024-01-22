@@ -1,7 +1,10 @@
 package service
 
 import (
+	"bytes"
 	"fmt"
+	"html/template"
+	"strconv"
 	"time"
 
 	"github.com/shopspring/decimal"
@@ -9,54 +12,82 @@ import (
 	"github.com/FrancoLiberali/stori_challenge/app/adapters"
 )
 
-type EmailService struct {
-	EmailSender adapters.EmailSender
+type IEmailService interface {
+	// Send formats the data received by parameters into the Stori mail and sends it by email
+	Send(
+		destinationEmail string,
+		totalBalance decimal.Decimal,
+		transactionsPerMonth []TransactionsPerMonth,
+		avgDebit, avgCredit decimal.Decimal,
+	) error
 }
 
-const (
-	emailMessage = `
-Total balance is: %s
-%sAverage debit amount: %s
-Average credit amount: %s
-`
-	emailSubject = "Stori transaction summary"
-)
+type EmailService struct {
+	EmailSender adapters.EmailSender
+	Template    *template.Template
+}
 
-func (emailService EmailService) send(
+const emailSubject = "Stori transaction summary"
+
+type transactionsPerMonthEmailData struct {
+	Month string
+	Value string
+	IsOdd bool
+}
+
+type emailData struct {
+	Date                     string
+	TotalBalance             string
+	AvgDebit                 string
+	AvgCredit                string
+	TransactionsPerMonthList []transactionsPerMonthEmailData
+}
+
+// send formats the data received by parameters into the Stori mail and sends it by email
+func (emailService EmailService) Send(
 	destinationEmail string,
 	totalBalance decimal.Decimal,
 	transactionsPerMonth []TransactionsPerMonth,
 	avgDebit, avgCredit decimal.Decimal,
 ) error {
-	return emailService.EmailSender.Send(destinationEmail, emailSubject, fmt.Sprintf(
-		emailMessage,
-		totalBalance,
-		transactionsPerMonthToString(transactionsPerMonth),
-		avgDebit,
-		avgCredit,
-	))
+	var htmlBuffer bytes.Buffer
+
+	err := emailService.Template.Execute(&htmlBuffer, emailData{
+		Date:                     time.Now().Format(time.DateTime),
+		TotalBalance:             totalBalance.String(),
+		AvgDebit:                 avgDebit.String(),
+		AvgCredit:                avgCredit.String(),
+		TransactionsPerMonthList: transactionsPerMonthToEmailData(transactionsPerMonth),
+	})
+	if err != nil {
+		return fmt.Errorf("%w: %s", adapters.ErrSendingEmail, err.Error())
+	}
+
+	return emailService.EmailSender.Send(destinationEmail, emailSubject, htmlBuffer.String())
 }
 
-// transactionsPerMonthToString transforms a list of transactions per month to string that can be sent to the user by email
-func transactionsPerMonthToString(transactionsPerMonth []TransactionsPerMonth) string {
-	result := ""
+// transactionsPerMonthToEmailData transforms a list of transactions per month to
+// a list of transactionsPerMonthEmailData that can be render into the email template
+func transactionsPerMonthToEmailData(transactionsPerMonthList []TransactionsPerMonth) []transactionsPerMonthEmailData {
+	currentYear := time.Now().Year()
 
-	for _, transactionPerMonth := range transactionsPerMonth {
+	result := make([]transactionsPerMonthEmailData, 0, len(transactionsPerMonthList))
+
+	for i, transactionsPerMonth := range transactionsPerMonthList {
+		var monthText string
+
 		// add year if not current year
-		if transactionPerMonth.Month.Year() != time.Now().Year() {
-			result += fmt.Sprintf(
-				"Number of transactions in %s %d: %d\n",
-				transactionPerMonth.Month.Month().String(),
-				transactionPerMonth.Month.Year(),
-				transactionPerMonth.Amount,
-			)
+		if transactionsPerMonth.Month.Year() != currentYear {
+			monthText = fmt.Sprintf("%s %d", transactionsPerMonth.Month.Month().String(), transactionsPerMonth.Month.Year())
 		} else {
-			result += fmt.Sprintf(
-				"Number of transactions in %s: %d\n",
-				transactionPerMonth.Month.Month().String(),
-				transactionPerMonth.Amount,
-			)
+			monthText = transactionsPerMonth.Month.Month().String()
 		}
+
+		result = append(result, transactionsPerMonthEmailData{
+			Month: monthText,
+			Value: strconv.Itoa(transactionsPerMonth.Amount),
+			IsOdd: (i%2 == 0),
+		})
 	}
 
 	return result

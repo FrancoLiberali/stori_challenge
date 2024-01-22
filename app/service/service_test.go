@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"testing"
@@ -9,12 +9,14 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/FrancoLiberali/stori_challenge/app/adapters"
-	mocks "github.com/FrancoLiberali/stori_challenge/app/mocks/adapters"
+	mocksAdapters "github.com/FrancoLiberali/stori_challenge/app/mocks/adapters"
+	mocksService "github.com/FrancoLiberali/stori_challenge/app/mocks/service"
 	"github.com/FrancoLiberali/stori_challenge/app/models"
+	"github.com/FrancoLiberali/stori_challenge/app/service"
 )
 
 func TestCalculateTotalBalance(t *testing.T) {
-	service := Service{}
+	service := service.Service{}
 	tests := []struct {
 		name string
 		got  []models.Transaction
@@ -41,16 +43,16 @@ func TestCalculateTotalBalance(t *testing.T) {
 }
 
 func TestCalculateTransactionsPerMonth(t *testing.T) {
-	service := Service{}
+	processService := service.Service{}
 	tests := []struct {
 		name string
 		got  []models.Transaction
-		want []TransactionsPerMonth
+		want []service.TransactionsPerMonth
 	}{
-		{"0 transactions returns empty", []models.Transaction{}, []TransactionsPerMonth{}},
+		{"0 transactions returns empty", []models.Transaction{}, []service.TransactionsPerMonth{}},
 		{"1 transaction returns 1 for one month", []models.Transaction{
 			{Date: time.Date(time.Now().Year(), 7, 10, 0, 0, 0, 0, time.UTC)},
-		}, []TransactionsPerMonth{
+		}, []service.TransactionsPerMonth{
 			{
 				Month:  time.Date(time.Now().Year(), 7, 1, 0, 0, 0, 0, time.UTC),
 				Amount: 1,
@@ -59,7 +61,7 @@ func TestCalculateTransactionsPerMonth(t *testing.T) {
 		{"2 transactions in different months", []models.Transaction{
 			{Date: time.Date(time.Now().Year(), 7, 10, 0, 0, 0, 0, time.UTC)},
 			{Date: time.Date(time.Now().Year(), 8, 16, 0, 0, 0, 0, time.UTC)},
-		}, []TransactionsPerMonth{
+		}, []service.TransactionsPerMonth{
 			{
 				Month:  time.Date(time.Now().Year(), 7, 1, 0, 0, 0, 0, time.UTC),
 				Amount: 1,
@@ -74,7 +76,7 @@ func TestCalculateTransactionsPerMonth(t *testing.T) {
 			{Date: time.Date(time.Now().Year(), 7, 28, 0, 0, 0, 0, time.UTC)},
 			{Date: time.Date(time.Now().Year(), 8, 2, 0, 0, 0, 0, time.UTC)},
 			{Date: time.Date(time.Now().Year(), 8, 13, 0, 0, 0, 0, time.UTC)},
-		}, []TransactionsPerMonth{
+		}, []service.TransactionsPerMonth{
 			{
 				Month:  time.Date(time.Now().Year(), 7, 1, 0, 0, 0, 0, time.UTC),
 				Amount: 2,
@@ -88,7 +90,7 @@ func TestCalculateTransactionsPerMonth(t *testing.T) {
 			{Date: time.Date(time.Now().Year(), 7, 15, 0, 0, 0, 0, time.UTC)},
 			{Date: time.Date(time.Now().Year(), 7, 28, 0, 0, 0, 0, time.UTC)},
 			{Date: time.Date(2023, 7, 28, 0, 0, 0, 0, time.UTC)},
-		}, []TransactionsPerMonth{
+		}, []service.TransactionsPerMonth{
 			{
 				Month:  time.Date(2023, 7, 1, 0, 0, 0, 0, time.UTC),
 				Amount: 1,
@@ -105,13 +107,13 @@ func TestCalculateTransactionsPerMonth(t *testing.T) {
 		// table entry. These are shown separately
 		// when executing `go test -v`.
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equal(t, tt.want, service.CalculateTransactionsPerMonth(tt.got))
+			assert.Equal(t, tt.want, processService.CalculateTransactionsPerMonth(tt.got))
 		})
 	}
 }
 
 func TestCalculateAverageDebitAndCredit(t *testing.T) {
-	service := Service{}
+	processService := service.Service{}
 	tests := []struct {
 		name   string
 		got    []models.Transaction
@@ -142,7 +144,7 @@ func TestCalculateAverageDebitAndCredit(t *testing.T) {
 		// table entry. These are shown separately
 		// when executing `go test -v`.
 		t.Run(tt.name, func(t *testing.T) {
-			debit, credit := service.CalculateAverageDebitAndCredit(tt.got)
+			debit, credit := processService.CalculateAverageDebitAndCredit(tt.got)
 			assert.Equal(t, tt.debit, debit.String())
 			assert.Equal(t, tt.credit, credit.String())
 		})
@@ -150,74 +152,78 @@ func TestCalculateAverageDebitAndCredit(t *testing.T) {
 }
 
 func TestProcessReturnsErrorIfCSVCantBeRead(t *testing.T) {
-	mockCSVReader := mocks.NewCSVReader(t)
-	service := Service{TransactionsReader: TransactionsReader{
+	mockCSVReader := mocksAdapters.NewCSVReader(t)
+	processService := service.Service{TransactionsReader: service.TransactionsReader{
 		LocalCSVReader: mockCSVReader,
 	}}
 
 	mockCSVReader.On("Read", "not_found.csv").Return(nil, adapters.ErrReadingFile)
 
-	err := service.Process("not_found.csv", "client@mail.com")
-	require.ErrorIs(t, err, ErrReadingTransactions)
+	err := processService.Process("not_found.csv", "client@mail.com")
+	require.ErrorIs(t, err, service.ErrReadingTransactions)
 	require.ErrorContains(t, err, "error while reading file")
 }
 
 func TestProcessReturnsErrorIfCSVCantBeParsed(t *testing.T) {
-	mockCSVReader := mocks.NewCSVReader(t)
-	service := Service{TransactionsReader: TransactionsReader{
+	mockCSVReader := mocksAdapters.NewCSVReader(t)
+	processService := service.Service{TransactionsReader: service.TransactionsReader{
 		LocalCSVReader: mockCSVReader,
 	}}
 
 	mockCSVReader.On("Read", "found.csv").Return([][]string{{"asd"}}, nil)
 
-	err := service.Process("found.csv", "client@mail.com")
-	require.ErrorIs(t, err, ErrReadingTransactions)
+	err := processService.Process("found.csv", "client@mail.com")
+	require.ErrorIs(t, err, service.ErrReadingTransactions)
 }
 
 func TestReturnsErrorIfErrorIsProducedWhileSendingEmail(t *testing.T) {
-	mockCSVReader := mocks.NewCSVReader(t)
-	mockEmailSender := mocks.NewEmailSender(t)
-	service := Service{
-		TransactionsReader: TransactionsReader{
+	mockCSVReader := mocksAdapters.NewCSVReader(t)
+	mockEmailSender := mocksService.NewIEmailService(t)
+	processService := service.Service{
+		TransactionsReader: service.TransactionsReader{
 			LocalCSVReader: mockCSVReader,
 		},
-		EmailService: EmailService{
-			EmailSender: mockEmailSender,
-		},
+		EmailService: mockEmailSender,
 	}
 
 	mockCSVReader.On("Read", "correct.csv").Return([][]string{{"0", "7/15", "+60.5"}}, nil)
-	mockEmailSender.On("Send", "client@mail.com", emailSubject, `
-Total balance is: 60.5
-Number of transactions in July: 1
-Average debit amount: 0
-Average credit amount: 60.5
-`).Return(adapters.ErrSendingEmail)
+	mockEmailSender.On(
+		"Send",
+		"client@mail.com",
+		decimal.NewFromFloat(60.5),
+		[]service.TransactionsPerMonth{
+			{Month: time.Date(time.Now().Year(), 7, 1, 0, 0, 0, 0, time.UTC), Amount: 1},
+		},
+		decimal.NewFromInt(0),
+		decimal.NewFromFloat(60.5),
+	).Return(adapters.ErrSendingEmail)
 
-	err := service.Process("correct.csv", "client@mail.com")
+	err := processService.Process("correct.csv", "client@mail.com")
 	require.ErrorIs(t, err, adapters.ErrSendingEmail)
 }
 
 func TestProcessReturnsNilIfAllCorrect(t *testing.T) {
-	mockCSVReader := mocks.NewCSVReader(t)
-	mockEmailSender := mocks.NewEmailSender(t)
-	service := Service{
-		TransactionsReader: TransactionsReader{
+	mockCSVReader := mocksAdapters.NewCSVReader(t)
+	mockEmailSender := mocksService.NewIEmailService(t)
+	processService := service.Service{
+		TransactionsReader: service.TransactionsReader{
 			LocalCSVReader: mockCSVReader,
 		},
-		EmailService: EmailService{
-			EmailSender: mockEmailSender,
-		},
+		EmailService: mockEmailSender,
 	}
 
 	mockCSVReader.On("Read", "correct.csv").Return([][]string{{"0", "7/15", "+60.5"}}, nil)
-	mockEmailSender.On("Send", "client@mail.com", emailSubject, `
-Total balance is: 60.5
-Number of transactions in July: 1
-Average debit amount: 0
-Average credit amount: 60.5
-`).Return(nil)
+	mockEmailSender.On(
+		"Send",
+		"client@mail.com",
+		decimal.NewFromFloat(60.5),
+		[]service.TransactionsPerMonth{
+			{Month: time.Date(time.Now().Year(), 7, 1, 0, 0, 0, 0, time.UTC), Amount: 1},
+		},
+		decimal.NewFromInt(0),
+		decimal.NewFromFloat(60.5),
+	).Return(nil)
 
-	err := service.Process("correct.csv", "client@mail.com")
+	err := processService.Process("correct.csv", "client@mail.com")
 	require.NoError(t, err)
 }
