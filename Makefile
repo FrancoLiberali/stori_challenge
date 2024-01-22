@@ -13,14 +13,11 @@ test_unit:
 	go test -v ./app/...
 
 test_integration:
+	docker compose -f "docker/docker-compose.yml" up db -d --wait --wait-timeout 30
 	go test -v ./test_integration
 
 test_e2e:
-	go install .
-	go test -count=1 ./test_e2e
-
-docker_build:
-	docker build -t francoliberali/stori_challenge:latest .
+	go test -v -count=1 ./test_e2e
 
 aws_build:
 	cd aws_lambda && GOOS=linux GOARCH=amd64 go build -tags lambda.norpc -o bootstrap main.go && zip stori-challenge.zip bootstrap

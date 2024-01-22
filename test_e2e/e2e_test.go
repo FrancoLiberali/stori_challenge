@@ -31,10 +31,13 @@ var (
 )
 
 const (
-	csvFileName    = "csv_file.csv"
-	s3BucketRegion = "us-east-2"
-	s3Protocol     = "s3://"
-	s3BucketName   = "fl-stori-challenge"
+	csvFileName       = "csv_file.csv"
+	csvFileNameInData = "data/" + csvFileName
+	csvFilePath       = "../" + csvFileNameInData
+	s3BucketRegion    = "us-east-2"
+	s3Protocol        = "s3://"
+	s3BucketName      = "fl-stori-challenge"
+	appName           = "../process.sh"
 )
 
 func init() {
@@ -77,7 +80,7 @@ func InitializeScenario(sc *godog.ScenarioContext) {
 
 // Creates in local a CSV file called csv_file.csv with the content of the godog.Table
 func localCSVFile(fileContent *godog.Table) error {
-	csvFile, err := os.Create(csvFileName)
+	csvFile, err := os.Create(csvFilePath)
 	if err != nil {
 		return err
 	}
@@ -97,7 +100,7 @@ func localCSVFile(fileContent *godog.Table) error {
 
 	csvWriter.Flush()
 
-	fileName = csvFileName
+	fileName = csvFileNameInData
 
 	return nil
 }
@@ -118,7 +121,7 @@ func s3CSVFile(fileContent *godog.Table) error {
 
 	svc := s3.New(sess)
 
-	file, err := os.Open(csvFileName)
+	file, err := os.Open(csvFilePath)
 	if err != nil {
 		return err
 	}
@@ -151,11 +154,7 @@ func s3CSVFile(fileContent *godog.Table) error {
 
 // Executes the transaction processing system
 func executeSystem() error {
-	app := "stori_challenge"
-	argFile := "-file"
-	argEmail := "-email"
-
-	output, err := exec.Command(app, argFile, fileName, argEmail, receiveInbox.EmailAddress).CombinedOutput()
+	output, err := exec.Command(appName, fileName, receiveInbox.EmailAddress).CombinedOutput()
 	if err != nil {
 		log.Println(string(output))
 	}
@@ -183,8 +182,10 @@ func iReceiveTheEmail(subject string, content *godog.Table) error {
 		value := row.Cells[1].Value
 
 		switch row.Cells[0].Value {
-		case "Total balance":
-			contains = fmt.Sprintf("<span>Total balance: <strong>$%s</strong></span>", value)
+		case "User balance":
+			contains = fmt.Sprintf("<span>Your balance: <strong>$%s</strong></span>", value)
+		case "Transactions balance":
+			contains = fmt.Sprintf(`class="tbal"><span><span><strong>$%s</strong></span></span></span>`, value)
 		case "Average credit":
 			contains = fmt.Sprintf(`<span class="avg-cre"><span><span><strong>$%s</strong></span></span></span>`, value)
 		case "Average debit":

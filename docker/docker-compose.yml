@@ -1,0 +1,51 @@
+# DEVELOPMENT ONLY, DO NOT USE FOR PRODUCTION
+version: '3.5'
+
+services:
+  db:
+    container_name: "stori-challenge-test-db"
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: stori
+      POSTGRES_PASSWORD: stori_challenge2024
+      POSTGRES_DB: stori_db
+      PGDATA: /data/postgres
+    command:
+      [
+        "postgres",
+        "-c",
+        "log_statement=all",
+        "-c",
+        "log_destination=stderr"
+      ]
+    ports:
+      - "5432:5432"
+    volumes:
+      - .:/docker-entrypoint-initdb.d/
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  main:
+    container_name: "stori-challenge-test-main"
+    build:
+      context: ..
+      dockerfile: ./docker/Dockerfile
+    image: francoliberali/stori_challenge:latest
+    environment:
+      EMAIL_PUBLIC_API_KEY: "${EMAIL_PUBLIC_API_KEY}"
+      EMAIL_PRIVATE_API_KEY: "${EMAIL_PRIVATE_API_KEY}"
+      DB_URL: db
+      DB_PORT: 5432
+      DB_USER: stori
+      DB_PASSWORD: stori_challenge2024
+      DB_NAME: stori_db
+      DB_SSL: disable
+    command: [ "-file", "${FILE}", "-email", "${EMAIL}" ]
+    volumes:
+      - ../data:/data:ro
+    depends_on:
+      db:
+        condition: service_healthy

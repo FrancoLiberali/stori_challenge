@@ -9,13 +9,11 @@
 
 Coding Challenge for Stori made by Franco Liberali
 
+- [Assumptions](#assumptions)
+- [Technical decisions](#technical-decisions)
 - [Execution](#execution)
   - [Run on AWS Lambda](#run-on-aws-lambda)
   - [Run locally](#run-locally)
-    - [Run with docker](#run-with-docker)
-      - [Image from the container registry](#image-from-the-container-registry)
-      - [Build the image](#build-the-image)
-    - [Run with Go](#run-with-go)
 - [Practices used](#practices-used)
   - [Linting](#linting)
   - [Unit tests](#unit-tests)
@@ -34,6 +32,23 @@ Coding Challenge for Stori made by Franco Liberali
 - [The challenge](#the-challenge)
   - [Bonus points](#bonus-points)
   - [Delivery and code requirements](#delivery-and-code-requirements)
+
+## Assumptions
+
+Regarding bonus point 1:
+
+1. Transaction ids within the file are assumed to be unique within the file only, so a new unique id is generated to store a transaction in the database. The id within the file and the file name are also saved.
+2. It is assumed that users can be uniquely identified by their email address.
+3. It is assumed that the user to which the transactions apply is the same as the user to be notified.
+4. The balance of transactions is applied to the user's balance. In the notification email, the user's final balance is shown as "Your balance" and the transaction balance as "Transactions balance".
+
+For the local execution steps, a linux environment is assumed.
+
+## Technical decisions
+
+Regarding bonus point 1:
+
+1. Since no use of the information to be persisted is specified, there is no limitation on the database technology to be used. It is decided to use postgreSQL only for ease of use.
 
 ## Execution
 
@@ -55,49 +70,30 @@ The [CD](#cd) process updates the function each time a commit is made to the mai
 
 ### Run locally
 
-In the local version it is possible to use both local files and files hosted on AWS S3 (publicly).
+In the local version it is possible to use both local files and files hosted on AWS S3 (publicly). The execution is done using docker.
 
-#### Run with docker
+1. Install docker and compose plugin
+2. Set your environment variables by copying the docker/.env.example file to docker/.env:
 
-You can use the pre-built image or build it yourself.
+   ```bash
+   cp docker/.env.example docker/.env
+   ```
 
-##### Image from the container registry
+   :warning: To run it locally you will need a [mailjet](mailjet.com) key pair. In this case, the variables are already in the .env.example file to avoid the need for proofreaders to create an account, but in real life these credentials would never be shared (See [emails](#emails) for details).
+3. Execute it:
+   1. With a local file:
 
-The [CD](#cd) process updates the image in the container registry each time a commit is made to the main branch.
+      ```bash
+      ./process.sh data/txns2.csv you@email.com
+      ```
 
-1. Install docker
+   2. With a file in AWS S3:
 
-With local file:
+      ```bash
+      ./process.sh s3://fl-stori-challenge/txns2.csv you@email.com
+      ````
 
-2. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> -v $(pwd)/data:/data ghcr.io/francoliberali/stori_challenge:latest -file data/txns2.csv -email you@email.com`
-
-> :warning: To run it locally you will need a [mailjet](mailjet.com) key pair. See [emails](#emails) for details.
-
-With AWS S3 hosted file:
-
-2. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> ghcr.io/francoliberali/stori_challenge:latest -file s3://fl-stori-challenge/txns2.csv -email you@email.com`
-
-##### Build the image
-
-1. Install docker
-2. Clone this repository
-3. `docker build -t francoliberali/stori_challenge:latest .`
-4. `docker run -e EMAIL_PUBLIC_API_KEY=<public-api-key> -e EMAIL_PRIVATE_API_KEY=<private-api-key> -v $(pwd)/data:/data francoliberali/stori_challenge -file data/txns2.csv -email you@email.com`
-
-#### Run with Go
-
-1. Install Go 1.18+.
-2. Clone this repository
-3. `go mod download`
-
-Run it with go run:
-
-4. `EMAIL_PUBLIC_API_KEY=<public-api-key> EMAIL_PRIVATE_API_KEY=<private-api-key> go run . -file data/txns2.csv -email you@email.com`
-
-Or install it and then run it:
-
-4. `go install .`
-5. `EMAIL_PUBLIC_API_KEY=<public-api-key> EMAIL_PRIVATE_API_KEY=<private-api-key> stori_challenge -file data/txns2.csv -email you@email.com`
+   :warning: Don't forget to replace <you@email.com> with your email address
 
 ## Practices used
 
@@ -120,7 +116,7 @@ make test_unit
 To ensure that they are unitary, mocks are used. They are generated using [mockery](https://vektra.github.io/mockery/latest/). To regenerate them, [install the dependencies](#dependencies) and run:
 
 ```bash
-go generate ./app/...
+cd app && go generate ./...
 ```
 
 ### Integration tests
@@ -136,7 +132,7 @@ make test_integration
 Feature tests (or e2e) are tests that cover the end-to-end system. They are located in the `test_e2e/` folder and are performed under the [BDD](#bdd--tdd) practice. They are executed during [continuous integration](#ci). To run them locally, run:
 
 ```bash
-EMAIL_PUBLIC_API_KEY=<public-api-key> EMAIL_PRIVATE_API_KEY=<private-api-key> make test_e2e
+make test_e2e
 ```
 
 For executing this, you will need to have configured your aws credentials in `~/.aws/credentials`. For details see <https://docs.aws.amazon.com/sdk-for-go/v1/developer-guide/configuring-sdk.html#specifying-credentials>.
@@ -163,7 +159,7 @@ The continuous integration process is run every time a pull request or commit is
 
 ### CD
 
-The continuous delivery process is executed every time a commit is performed on the main branch and the CI process is successful. It builds the docker image and pushes it to the container registry and builds the AWS Lambda function and deploys it.
+The continuous delivery process is executed every time a commit is performed on the main branch and the CI process is successful. It builds the AWS Lambda function and deploys it.
 
 ### Hexagonal architecture
 

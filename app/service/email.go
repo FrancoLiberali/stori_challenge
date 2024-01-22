@@ -10,13 +10,14 @@ import (
 	"github.com/shopspring/decimal"
 
 	"github.com/FrancoLiberali/stori_challenge/app/adapters"
+	"github.com/FrancoLiberali/stori_challenge/app/models"
 )
 
 type IEmailService interface {
 	// Send formats the data received by parameters into the Stori mail and sends it by email
 	Send(
-		destinationEmail string,
-		totalBalance decimal.Decimal,
+		user *models.User,
+		transactionBalance decimal.Decimal,
 		transactionsPerMonth []TransactionsPerMonth,
 		avgDebit, avgCredit decimal.Decimal,
 	) error
@@ -37,7 +38,8 @@ type transactionsPerMonthEmailData struct {
 
 type emailData struct {
 	Date                     string
-	TotalBalance             string
+	UserBalance              string
+	TransactionsBalance      string
 	AvgDebit                 string
 	AvgCredit                string
 	TransactionsPerMonthList []transactionsPerMonthEmailData
@@ -45,8 +47,8 @@ type emailData struct {
 
 // send formats the data received by parameters into the Stori mail and sends it by email
 func (emailService EmailService) Send(
-	destinationEmail string,
-	totalBalance decimal.Decimal,
+	user *models.User,
+	transactionsBalance decimal.Decimal,
 	transactionsPerMonth []TransactionsPerMonth,
 	avgDebit, avgCredit decimal.Decimal,
 ) error {
@@ -54,7 +56,8 @@ func (emailService EmailService) Send(
 
 	err := emailService.Template.Execute(&htmlBuffer, emailData{
 		Date:                     time.Now().Format(time.DateTime),
-		TotalBalance:             totalBalance.String(),
+		UserBalance:              user.Balance.String(),
+		TransactionsBalance:      transactionsBalance.String(),
 		AvgDebit:                 avgDebit.String(),
 		AvgCredit:                avgCredit.String(),
 		TransactionsPerMonthList: transactionsPerMonthToEmailData(transactionsPerMonth),
@@ -63,7 +66,7 @@ func (emailService EmailService) Send(
 		return fmt.Errorf("%w: %s", adapters.ErrSendingEmail, err.Error())
 	}
 
-	return emailService.EmailSender.Send(destinationEmail, emailSubject, htmlBuffer.String())
+	return emailService.EmailSender.Send(user.Email, emailSubject, htmlBuffer.String())
 }
 
 // transactionsPerMonthToEmailData transforms a list of transactions per month to

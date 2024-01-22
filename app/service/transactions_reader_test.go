@@ -16,6 +16,8 @@ import (
 func TestParse(t *testing.T) {
 	reader := TransactionsReader{}
 
+	fileName := "test.csv"
+
 	tests := []struct {
 		name       string
 		got        [][]string
@@ -81,7 +83,7 @@ func TestParse(t *testing.T) {
 				{"0", "7/15", "+60.5"},
 			},
 			[]models.Transaction{
-				{ID: 0, Date: time.Date(time.Now().Year(), 7, 15, 0, 0, 0, 0, time.UTC), Amount: decimal.NewFromFloat32(60.5)},
+				{IDInFile: 0, FileName: fileName, Date: time.Date(time.Now().Year(), 7, 15, 0, 0, 0, 0, time.UTC), Amount: decimal.NewFromFloat32(60.5)},
 			},
 			nil,
 			"",
@@ -95,10 +97,10 @@ func TestParse(t *testing.T) {
 				{"3", "8/13", "+10"},
 			},
 			[]models.Transaction{
-				{ID: 0, Date: time.Date(time.Now().Year(), 7, 15, 0, 0, 0, 0, time.UTC), Amount: decimal.NewFromFloat32(60.5)},
-				{ID: 1, Date: time.Date(time.Now().Year(), 7, 28, 0, 0, 0, 0, time.UTC), Amount: decimal.NewFromFloat32(-10.3)},
-				{ID: 2, Date: time.Date(time.Now().Year(), 8, 2, 0, 0, 0, 0, time.UTC), Amount: decimal.NewFromFloat32(-20.46)},
-				{ID: 3, Date: time.Date(time.Now().Year(), 8, 13, 0, 0, 0, 0, time.UTC), Amount: decimal.NewFromInt(10)},
+				{IDInFile: 0, FileName: fileName, Date: time.Date(time.Now().Year(), 7, 15, 0, 0, 0, 0, time.UTC), Amount: decimal.NewFromFloat32(60.5)},
+				{IDInFile: 1, FileName: fileName, Date: time.Date(time.Now().Year(), 7, 28, 0, 0, 0, 0, time.UTC), Amount: decimal.NewFromFloat32(-10.3)},
+				{IDInFile: 2, FileName: fileName, Date: time.Date(time.Now().Year(), 8, 2, 0, 0, 0, 0, time.UTC), Amount: decimal.NewFromFloat32(-20.46)},
+				{IDInFile: 3, FileName: fileName, Date: time.Date(time.Now().Year(), 8, 13, 0, 0, 0, 0, time.UTC), Amount: decimal.NewFromInt(10)},
 			},
 			nil,
 			"",
@@ -110,7 +112,7 @@ func TestParse(t *testing.T) {
 		// table entry. These are shown separately
 		// when executing `go test -v`.
 		t.Run(tt.name, func(t *testing.T) {
-			ans, err := reader.parse(tt.got)
+			ans, err := reader.parse(tt.got, fileName)
 
 			require.ErrorIs(t, err, tt.err)
 
