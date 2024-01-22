@@ -179,6 +179,7 @@ func iReceiveTheEmail(subject string, content *godog.Table) error {
 
 	for _, row := range content.Rows {
 		var contains string
+
 		value := row.Cells[1].Value
 
 		switch row.Cells[0].Value {
