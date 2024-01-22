@@ -13,7 +13,7 @@ test_unit:
 	go test -v ./app/...
 
 test_integration:
-	docker compose -f "docker/docker-compose.yml" up db -d
+	docker compose -f "docker/docker-compose.yml" up db -d --wait --wait-timeout 30
 	go test -v ./test_integration
 
 test_e2e:
