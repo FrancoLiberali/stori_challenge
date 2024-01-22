@@ -32,9 +32,11 @@ func NewService() (*service.Service, error) {
 			LocalCSVReader: adapters.LocalCSVReader{},
 			S3CSVReader:    adapters.S3CSVReader{},
 		},
-		EmailSender: adapters.MailJetEmailSender{
-			PublicAPIKey:  emailPublicAPIKey,
-			PrivateAPIKey: emailPrivateAPIKey,
+		EmailService: service.EmailService{
+			EmailSender: adapters.MailJetEmailSender{
+				PublicAPIKey:  emailPublicAPIKey,
+				PrivateAPIKey: emailPrivateAPIKey,
+			},
 		},
 	}, nil
 }

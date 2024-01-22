@@ -16,7 +16,9 @@ func TestProcessLocalCSVFileSendsEmail(t *testing.T) {
 		TransactionsReader: service.TransactionsReader{
 			LocalCSVReader: adapters.LocalCSVReader{},
 		},
-		EmailSender: mockEmailSender,
+		EmailService: service.EmailService{
+			EmailSender: mockEmailSender,
+		},
 	}
 
 	mockEmailSender.On("Send", "client@mail.com", "Stori transaction summary", `
@@ -38,7 +40,9 @@ func TestProcessS3CSVFileSendsEmail(t *testing.T) {
 		TransactionsReader: service.TransactionsReader{
 			S3CSVReader: mockS3Reader,
 		},
-		EmailSender: mockEmailSender,
+		EmailService: service.EmailService{
+			EmailSender: mockEmailSender,
+		},
 	}
 
 	mockS3Reader.On("Read", "fl-stori-challenge/txns1.csv").Return(
