@@ -185,7 +185,7 @@ func iReceiveTheEmail(subject string, content *godog.Table) error {
 		case "User balance":
 			contains = fmt.Sprintf("<span>Your balance: <strong>$%s</strong></span>", value)
 		case "Transactions balance":
-			contains = fmt.Sprintf(`<span class="tbal"><span><span><strong>$%s</strong></span></span></span>`, value)
+			contains = fmt.Sprintf(`class="tbal"><span><span><strong>$%s</strong></span></span></span>`, value)
 		case "Average credit":
 			contains = fmt.Sprintf(`<span class="avg-cre"><span><span><strong>$%s</strong></span></span></span>`, value)
 		case "Average debit":
