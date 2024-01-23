@@ -2,7 +2,6 @@ package testintegration
 
 import (
 	"html/template"
-	"strconv"
 	"strings"
 
 	"github.com/shopspring/decimal"
@@ -24,14 +23,6 @@ type IntTestSuite struct {
 }
 
 func (ts *IntTestSuite) SetupTest() {
-	ts.T().Setenv(app.EmailPublicAPIKeyEnvVar, "asd")
-	ts.T().Setenv(app.EmailPrivateAPIKeyEnvVar, "asd")
-	ts.T().Setenv(app.DBURLEnvVar, host)
-	ts.T().Setenv(app.DBPortEnvVar, strconv.Itoa(port))
-	ts.T().Setenv(app.DBUserEnvVar, username)
-	ts.T().Setenv(app.DBPasswordEnvVar, password)
-	ts.T().Setenv(app.DBNameEnvVar, dbName)
-	ts.T().Setenv(app.DBSSLEnvVar, sslMode)
 	CleanDB(ts.db)
 }
 
