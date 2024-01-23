@@ -8,7 +8,6 @@ require (
 	github.com/elliotchance/pie/v2 v2.8.0
 	github.com/shopspring/decimal v1.3.1
 	github.com/stretchr/testify v1.8.4
-	gorm.io/driver/postgres v1.5.4
 	gorm.io/gorm v1.25.5
 )
 
@@ -32,6 +31,7 @@ require (
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
+	gorm.io/driver/postgres v1.5.4 // indirect
 )
 
 replace github.com/FrancoLiberali/stori_challenge/app => ./../app

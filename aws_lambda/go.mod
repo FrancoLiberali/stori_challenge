@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/FrancoLiberali/stori_challenge/app v0.0.1
 	github.com/aws/aws-lambda-go v1.45.0
+	gorm.io/gorm v1.25.5
 )
 
 require (
@@ -27,7 +28,6 @@ require (
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 	gorm.io/driver/postgres v1.5.4 // indirect
-	gorm.io/gorm v1.25.5 // indirect
 )
 
 replace github.com/FrancoLiberali/stori_challenge/app => ./../app

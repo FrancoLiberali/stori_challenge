@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/FrancoLiberali/stori_challenge/app"
+	"github.com/FrancoLiberali/stori_challenge/app/models"
 )
 
 const helpHeader = `Stori challenge by Franco Liberali.
@@ -28,7 +29,20 @@ func main() {
 		os.Exit(1)
 	}
 
-	processService, err := app.NewService()
+	db, err := app.NewDBConnection()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	err = db.AutoMigrate(
+		models.User{},
+		models.Transaction{},
+	)
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+
+	processService, err := app.NewService(db)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

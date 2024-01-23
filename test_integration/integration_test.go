@@ -1,29 +1,35 @@
 package testintegration
 
 import (
-	"fmt"
 	"log"
+	"strconv"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/suite"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
 
-	"github.com/FrancoLiberali/cql/logger"
+	"github.com/FrancoLiberali/stori_challenge/app"
 )
 
 const (
-	username = "stori"
-	password = "stori_challenge2024"
 	host     = "localhost"
 	port     = 5432
+	username = "stori"
+	password = "stori_challenge2024"
 	sslMode  = "disable"
 	dbName   = "stori_db"
 )
 
 func TestMain(t *testing.T) {
-	db, err := NewDBConnection()
+	t.Setenv(app.EmailPublicAPIKeyEnvVar, "asd")
+	t.Setenv(app.EmailPrivateAPIKeyEnvVar, "asd")
+	t.Setenv(app.DBURLEnvVar, host)
+	t.Setenv(app.DBPortEnvVar, strconv.Itoa(port))
+	t.Setenv(app.DBUserEnvVar, username)
+	t.Setenv(app.DBPasswordEnvVar, password)
+	t.Setenv(app.DBNameEnvVar, dbName)
+	t.Setenv(app.DBSSLEnvVar, sslMode)
+
+	db, err := app.NewDBConnection()
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -34,19 +40,4 @@ func TestMain(t *testing.T) {
 	}
 
 	suite.Run(t, &IntTestSuite{db: db})
-}
-
-func NewDBConnection() (*gorm.DB, error) {
-	dialector := postgres.Open(
-		fmt.Sprintf(
-			"user=%s password=%s host=%s port=%d sslmode=%s dbname=%s",
-			username, password, host, port, sslMode, dbName,
-		),
-	)
-
-	return OpenWithRetry(
-		dialector,
-		logger.Default.ToLogMode(logger.Info),
-		10, time.Duration(5)*time.Second,
-	)
 }

@@ -2,7 +2,6 @@ package testintegration
 
 import (
 	"html/template"
-	"strconv"
 	"strings"
 
 	"github.com/shopspring/decimal"
@@ -24,14 +23,6 @@ type IntTestSuite struct {
 }
 
 func (ts *IntTestSuite) SetupTest() {
-	ts.T().Setenv(app.EmailPublicAPIKeyEnvVar, "asd")
-	ts.T().Setenv(app.EmailPrivateAPIKeyEnvVar, "asd")
-	ts.T().Setenv(app.DBURLEnvVar, host)
-	ts.T().Setenv(app.DBPortEnvVar, strconv.Itoa(port))
-	ts.T().Setenv(app.DBUserEnvVar, username)
-	ts.T().Setenv(app.DBPasswordEnvVar, password)
-	ts.T().Setenv(app.DBNameEnvVar, dbName)
-	ts.T().Setenv(app.DBSSLEnvVar, sslMode)
 	CleanDB(ts.db)
 }
 
@@ -39,7 +30,7 @@ func (ts *IntTestSuite) TestProcessLocalCSVFileSendsEmailWhenUserDoesNotExists()
 	mockEmailSender := mocks.NewEmailSender(ts.T())
 	userRepository := repository.UserRepository{}
 
-	storiService, err := app.NewService()
+	storiService, err := app.NewService(ts.db)
 	ts.Require().NoError(err)
 
 	storiService.EmailService = service.EmailService{
@@ -75,7 +66,7 @@ func (ts *IntTestSuite) TestProcessLocalCSVFileSendsEmailWhenUserDoesNotExists()
 func (ts *IntTestSuite) TestProcessLocalCSVFileSendsEmailWhenUserExists() {
 	mockEmailSender := mocks.NewEmailSender(ts.T())
 	userRepository := repository.UserRepository{}
-	storiService, err := app.NewService()
+	storiService, err := app.NewService(ts.db)
 	ts.Require().NoError(err)
 
 	storiService.EmailService = service.EmailService{
@@ -117,7 +108,7 @@ func (ts *IntTestSuite) TestProcessLocalCSVFileSendsEmailWhenUserExists() {
 func (ts *IntTestSuite) TestProcessS3CSVFileSendsEmail() {
 	mockEmailSender := mocks.NewEmailSender(ts.T())
 	mockS3Reader := mocks.NewCSVReader(ts.T())
-	storiService, err := app.NewService()
+	storiService, err := app.NewService(ts.db)
 	ts.Require().NoError(err)
 
 	storiService.EmailService = service.EmailService{
