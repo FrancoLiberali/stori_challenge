@@ -14,6 +14,7 @@ Coding Challenge for Stori made by Franco Liberali
 - [Execution](#execution)
   - [Run on AWS Lambda](#run-on-aws-lambda)
   - [Run locally](#run-locally)
+- [Code organization](#code-organization)
 - [Practices used](#practices-used)
   - [Linting](#linting)
   - [Unit tests](#unit-tests)
@@ -48,7 +49,7 @@ For the local execution steps, a linux environment is assumed.
 
 Regarding bonus point 1:
 
-1. Since no use of the information to be persisted is specified, there is no limitation on the database technology to be used. It is decided to use postgreSQL only for ease of use.
+1. Since no use of the information to be persisted is specified, there is no limitation on the database technology to be used. It is decided to use postgreSQL only for ease of use. It is deployed on [Neon](https://neon.tech).
 
 ## Execution
 
@@ -94,6 +95,25 @@ In the local version it is possible to use both local files and files hosted on 
       ````
 
    :warning: Don't forget to replace <you@email.com> with your email address
+
+## Code organization
+
+- project root: In this folder you will find project configuration files, a `process.sh` which is the local execution point and a `main.go` which is used in the local version.
+  - .github/: in this folder you will find github files as for ci and cd actions.
+  - app/: module where all the code of the solution can be found.
+    - adapters/: folder where all the components that interact with a service external to the system are located, following the [hexagonal architecture](#hexagonal-architecture) pattern.
+    - html/: folder containing the email.html file, template for sent emails.
+    - mocks/: contains the mocks generated automatically using mockery, used during [unit tests](#unit-tests).
+    - models/: contains the solution models: users and transactions.
+    - repository/: special case of adapters interacting with the database.
+      - conditions/: contains the automatically generated conditions for querying objects using [cql](https://github.com/FrancoLiberali/cql).
+    - service/: files containing the business logic of the system.
+  - aws_lambda: in this folder is the main.go for the version of the executable that runs on AWS Lambda.
+  - data/: examples of csv files for local processing can be found in this folder.
+  - docker/: this folder contains docker and docker compose files that allow local execution using Docker.
+  - test_e2e/: in this folder you will find the implementation of the steps to follow during the [feature tests](#feature-tests).
+    - features/: This folder contains the Gherkin file describing the features of the system.
+  - test_integration/: in this folder you will find the implementation of the steps to follow during the [integration tests](#integration-tests).
 
 ## Practices used
 
