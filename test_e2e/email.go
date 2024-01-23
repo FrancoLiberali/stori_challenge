@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	mailSlurpAPIKey  = "1e00055b86ab2cb033a3b9330145583afb5e239b1040e7110356998fc62a96cd" //nolint:gosec // simplification
-	receiveInboxID   = "5025da91-f501-4449-9d24-72e06773d061"
+	mailSlurpAPIKey  = "02c92c8842430fccb6f415a1f9eacfc93a9f49cb0552071272dcc3cab8214897" //nolint:gosec // simplification
+	receiveInboxID   = "76b6f705-49a1-4c96-b42c-fa75b122bc90"
 	mailSlurpTimeout = 30000 // miliseconds
 )
 
