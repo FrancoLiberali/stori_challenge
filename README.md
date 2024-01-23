@@ -59,7 +59,7 @@ To run the processing you will need a csv file of transactions. These files can 
 The developed solution is deployed on AWS Lambda. To execute it performs HTTP request to the function, for example, as follows:
 
 ```bash
-curl 'https://ge4dljm4r5aea6mp546mfxtuw40hsykq.lambda-url.us-east-2.on.aws/' -H 'Content-type: application/json' -d '{ "file": "s3://fl-stori-challenge/txns2.csv", "email": "you@email.com" }'
+curl 'https://a7cerhsfswfdffbmpioigjay7q0vzkur.lambda-url.us-east-2.on.aws/' -H 'Content-type: application/json' -d '{ "file": "s3://fl-stori-challenge/txns2.csv", "email": "you@email.com" }'
 ```
 
 > :warning: Don't forget to replace <you@email.com> with your email address
