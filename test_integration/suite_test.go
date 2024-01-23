@@ -39,7 +39,7 @@ func (ts *IntTestSuite) TestProcessLocalCSVFileSendsEmailWhenUserDoesNotExists()
 	mockEmailSender := mocks.NewEmailSender(ts.T())
 	userRepository := repository.UserRepository{}
 
-	storiService, err := app.NewService()
+	storiService, err := app.NewService(ts.db)
 	ts.Require().NoError(err)
 
 	storiService.EmailService = service.EmailService{
@@ -75,7 +75,7 @@ func (ts *IntTestSuite) TestProcessLocalCSVFileSendsEmailWhenUserDoesNotExists()
 func (ts *IntTestSuite) TestProcessLocalCSVFileSendsEmailWhenUserExists() {
 	mockEmailSender := mocks.NewEmailSender(ts.T())
 	userRepository := repository.UserRepository{}
-	storiService, err := app.NewService()
+	storiService, err := app.NewService(ts.db)
 	ts.Require().NoError(err)
 
 	storiService.EmailService = service.EmailService{
@@ -117,7 +117,7 @@ func (ts *IntTestSuite) TestProcessLocalCSVFileSendsEmailWhenUserExists() {
 func (ts *IntTestSuite) TestProcessS3CSVFileSendsEmail() {
 	mockEmailSender := mocks.NewEmailSender(ts.T())
 	mockS3Reader := mocks.NewCSVReader(ts.T())
-	storiService, err := app.NewService()
+	storiService, err := app.NewService(ts.db)
 	ts.Require().NoError(err)
 
 	storiService.EmailService = service.EmailService{
